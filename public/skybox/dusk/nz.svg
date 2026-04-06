@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#56608d"/>
+      <stop offset="44%" stop-color="#714c68"/>
+      <stop offset="74%" stop-color="#d88b75"/>
+      <stop offset="100%" stop-color="#2b1924"/>
+    </linearGradient>
+    <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd5a8" stop-opacity="0.0"/>
+      <stop offset="100%" stop-color="#ffd5a8" stop-opacity="0.32"/>
+    </linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="26"/></filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#sky)"/>
+  <ellipse cx="512" cy="652" rx="540" ry="170" fill="url(#haze)" />
+  <ellipse cx="312" cy="252" rx="240" ry="96" fill="#f4c8ca" fill-opacity="0.08" filter="url(#blur)"/>
+  <ellipse cx="792" cy="316" rx="250" ry="88" fill="#ffc2ad" fill-opacity="0.06" filter="url(#blur)"/>
+</svg>
