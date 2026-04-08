@@ -163,13 +163,13 @@ export function SceneLighting({
       />
 
       <directionalLight
-        castShadow
+        castShadow={!mobileView}
         color="#ffd6ad"
         intensity={mobileView ? (rooftopActive ? 1.38 : 1.64) : rooftopActive ? 0.9 : 1.16}
         position={[8.4, 12, 16]}
         shadow-bias={-0.00008}
-        shadow-mapSize-height={1024}
-        shadow-mapSize-width={1024}
+        shadow-mapSize-height={mobileView ? 512 : 1024}
+        shadow-mapSize-width={mobileView ? 512 : 1024}
       />
 
       <pointLight color="#ffd6a3" distance={58} intensity={mobileView ? 1.36 : 0.54} position={[0.6, 8.4, -18]} />
@@ -177,72 +177,78 @@ export function SceneLighting({
       <pointLight color="#ffc38e" distance={54} intensity={mobileView ? 1.06 : 0.34} position={[0, 5.4, -68]} />
       <pointLight color="#fff0d2" distance={44} intensity={mobileView ? 1.12 : 0.22} position={[0.2, 3.6, 6]} />
 
-      <object3D position={[1.8, 0.8, -65.8]} ref={plazaTargetRef} />
-      <spotLight
-        angle={0.42}
-        castShadow
-        color="#ffc38a"
-        distance={42}
-        intensity={0.24}
-        penumbra={0.72}
-        position={[2.8, 8.2, -60.4]}
-        ref={plazaSpotRef}
-        shadow-bias={-0.00008}
-        shadow-mapSize-height={1024}
-        shadow-mapSize-width={1024}
-      />
+      {!mobileView || plazaActive ? <object3D position={[1.8, 0.8, -65.8]} ref={plazaTargetRef} /> : null}
+      {!mobileView || plazaActive ? (
+        <spotLight
+          angle={0.42}
+          castShadow={!mobileView}
+          color="#ffc38a"
+          distance={42}
+          intensity={0.24}
+          penumbra={0.72}
+          position={[2.8, 8.2, -60.4]}
+          ref={plazaSpotRef}
+          shadow-bias={-0.00008}
+          shadow-mapSize-height={mobileView ? 512 : 1024}
+          shadow-mapSize-width={mobileView ? 512 : 1024}
+        />
+      ) : null}
 
-      <object3D position={[-0.8, 1.2, -107.8]} ref={powerTargetRef} />
-      <spotLight
-        angle={0.46}
-        castShadow
-        color="#ffd0a4"
-        distance={34}
-        intensity={0.3}
-        penumbra={0.84}
-        position={[0.8, 8.6, -101.2]}
-        ref={powerSpotRef}
-        shadow-bias={-0.00008}
-        shadow-mapSize-height={1024}
-        shadow-mapSize-width={1024}
-      />
+      {!mobileView || powerActive ? <object3D position={[-0.8, 1.2, -107.8]} ref={powerTargetRef} /> : null}
+      {!mobileView || powerActive ? (
+        <spotLight
+          angle={0.46}
+          castShadow={!mobileView}
+          color="#ffd0a4"
+          distance={34}
+          intensity={0.3}
+          penumbra={0.84}
+          position={[0.8, 8.6, -101.2]}
+          ref={powerSpotRef}
+          shadow-bias={-0.00008}
+          shadow-mapSize-height={mobileView ? 512 : 1024}
+          shadow-mapSize-width={mobileView ? 512 : 1024}
+        />
+      ) : null}
 
-      <object3D position={[7, 5.2, -131.4]} ref={rooftopTargetRef} />
-      <spotLight
-        angle={0.38}
-        castShadow
-        color="#ffd7b0"
-        distance={28}
-        intensity={0.26}
-        penumbra={0.88}
-        position={[7.8, 10.2, -127.4]}
-        ref={rooftopSpotRef}
-        shadow-bias={-0.00008}
-        shadow-mapSize-height={1024}
-        shadow-mapSize-width={1024}
-      />
+      {!mobileView || rooftopActive ? <object3D position={[7, 5.2, -131.4]} ref={rooftopTargetRef} /> : null}
+      {!mobileView || rooftopActive ? (
+        <spotLight
+          angle={0.38}
+          castShadow={!mobileView}
+          color="#ffd7b0"
+          distance={28}
+          intensity={0.26}
+          penumbra={0.88}
+          position={[7.8, 10.2, -127.4]}
+          ref={rooftopSpotRef}
+          shadow-bias={-0.00008}
+          shadow-mapSize-height={mobileView ? 512 : 1024}
+          shadow-mapSize-width={mobileView ? 512 : 1024}
+        />
+      ) : null}
 
       <pointLight color="#6ba9ff" distance={34} intensity={1.18} position={[0, 7.4, -26]} />
       <pointLight color="#ffbf74" distance={22} intensity={1.02} position={[0, 4.8, -11]} />
-      <pointLight color="#ffb96c" distance={16} intensity={0.76} position={[-5.6, 3.8, -12]} />
-      <pointLight color="#ffb96c" distance={16} intensity={0.74} position={[5.8, 3.8, -16]} />
-      <pointLight color="#ffd09d" distance={42} intensity={0.68} position={[0.6, 8.4, -34]} />
+      {!mobileView ? <pointLight color="#ffb96c" distance={16} intensity={0.76} position={[-5.6, 3.8, -12]} /> : null}
+      {!mobileView ? <pointLight color="#ffb96c" distance={16} intensity={0.74} position={[5.8, 3.8, -16]} /> : null}
+      {!mobileView ? <pointLight color="#ffd09d" distance={42} intensity={0.68} position={[0.6, 8.4, -34]} /> : null}
 
       <pointLight color="#ffc289" distance={38} intensity={0.36} position={[2.6, 5.2, -62.5]} ref={plazaLightRef} />
       <pointLight color="#ffe0b7" distance={28} intensity={0.2} position={[1.4, 3.8, -66]} ref={bloomLightRef} />
-      <pointLight color="#ffb979" distance={16} intensity={0.44} position={[-10.8, 3.4, -67.8]} />
-      <pointLight color="#ffb979" distance={16} intensity={0.42} position={[10.6, 3.4, -69]} />
-      <pointLight color="#ffcf93" distance={18} intensity={0.56} position={[1.8, 3.6, -74.6]} />
+      {!mobileView ? <pointLight color="#ffb979" distance={16} intensity={0.44} position={[-10.8, 3.4, -67.8]} /> : null}
+      {!mobileView ? <pointLight color="#ffb979" distance={16} intensity={0.42} position={[10.6, 3.4, -69]} /> : null}
+      {!mobileView || plazaActive ? <pointLight color="#ffcf93" distance={18} intensity={0.56} position={[1.8, 3.6, -74.6]} /> : null}
 
       <pointLight color="#7db6ff" distance={34} intensity={0.12} position={[-2.2, 5.2, -93.5]} ref={powerLightRef} />
       <pointLight color="#f6b96e" distance={26} intensity={0.08} position={[-0.4, 4.4, -98.4]} ref={powerAccentRef} />
-      <pointLight color="#ffb46f" distance={16} intensity={0.44} position={[-4.4, 3.2, -103.4]} />
-      <pointLight color="#ffb46f" distance={16} intensity={0.44} position={[2.8, 3.2, -104.2]} />
+      {!mobileView ? <pointLight color="#ffb46f" distance={16} intensity={0.44} position={[-4.4, 3.2, -103.4]} /> : null}
+      {!mobileView ? <pointLight color="#ffb46f" distance={16} intensity={0.44} position={[2.8, 3.2, -104.2]} /> : null}
 
       <pointLight color="#ffc18d" distance={26} intensity={0.1} position={[6.1, 5.6, -128.4]} ref={rooftopGlowRef} />
       <pointLight color="#9cc6ff" distance={38} intensity={0.16} position={[4.6, 8.4, -134]} ref={rooftopSkyRef} />
-      <pointLight color="#ffb476" distance={18} intensity={0.42} position={[9.8, 6.6, -127.2]} />
-      <pointLight color="#ffb476" distance={18} intensity={0.38} position={[3.2, 6.4, -126.8]} />
+      {!mobileView ? <pointLight color="#ffb476" distance={18} intensity={0.42} position={[9.8, 6.6, -127.2]} /> : null}
+      {!mobileView ? <pointLight color="#ffb476" distance={18} intensity={0.38} position={[3.2, 6.4, -126.8]} /> : null}
     </>
   );
 }

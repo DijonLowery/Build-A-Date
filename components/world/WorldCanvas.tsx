@@ -146,11 +146,24 @@ export function WorldCanvas({
 
   const mobileTransitionLite =
     isPhonePortrait &&
-    (phase === "walkingDinner" || phase === "walkingActivity" || phase === "walkingDrinks");
+    (phase === "walkingDate" ||
+      phase === "walkingDinner" ||
+      phase === "walkingActivity" ||
+      phase === "walkingDrinks");
+  const mobileMenuLite =
+    isPhonePortrait &&
+    (phase === "selectingDate" ||
+      phase === "selectingDinner" ||
+      phase === "selectingActivity" ||
+      phase === "selectingDrinks" ||
+      phase === "arrivedDinner" ||
+      phase === "arrivedActivity" ||
+      phase === "arrivedDrinks");
   const reducedDetail =
     phase === "introBrief" ||
     (transitioning && !worldAssetsReady) ||
-    mobileTransitionLite;
+    mobileTransitionLite ||
+    mobileMenuLite;
 
   const selectedDate = dateOptions.find((option) => option.id === selectedDateId) ?? null;
   const selectedDinner = dinnerOptions.find((option) => option.id === selectedDinnerId) ?? null;
@@ -175,9 +188,9 @@ export function WorldCanvas({
       : phase === "arrivedDate" || phase === "selectingDate" || phase === "lockedDate"
         ? "date"
         : null;
-  const plazaMounted = phase === "selectingDate" || phase === "lockedDate" || plazaActive;
-  const powerMounted = phase === "selectingDinner" || phase === "lockedDinner" || powerActive;
-  const rooftopMounted = phase === "selectingActivity" || phase === "lockedActivity" || rooftopActive;
+  const plazaMounted = isPhonePortrait ? phase === "lockedDate" || plazaActive : phase === "selectingDate" || phase === "lockedDate" || plazaActive;
+  const powerMounted = isPhonePortrait ? phase === "lockedDinner" || powerActive : phase === "selectingDinner" || phase === "lockedDinner" || powerActive;
+  const rooftopMounted = isPhonePortrait ? phase === "lockedActivity" || rooftopActive : phase === "selectingActivity" || phase === "lockedActivity" || rooftopActive;
 
   function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -202,13 +215,13 @@ export function WorldCanvas({
     >
       <Canvas
         camera={{ fov: 41, near: 0.1, far: 160, position: [0, 3.12, 9.4] }}
-        dpr={reducedDetail ? [1, 1] : isPhonePortrait ? [1.18, 1.52] : [1, 1.18]}
-        gl={{ alpha: false, antialias: true, powerPreference: "high-performance", stencil: false }}
+        dpr={isPhonePortrait ? [1, 1] : reducedDetail ? [1, 1] : [1, 1.18]}
+        gl={{ alpha: false, antialias: !isPhonePortrait, powerPreference: "high-performance", stencil: false }}
         onCreated={({ gl }) => {
           gl.shadowMap.enabled = true;
           gl.shadowMap.type = THREE.PCFSoftShadowMap;
           gl.toneMapping = THREE.ACESFilmicToneMapping;
-          gl.toneMappingExposure = isPhonePortrait ? 1.08 : 0.85;
+          gl.toneMappingExposure = isPhonePortrait ? 1.04 : 0.85;
           gl.outputColorSpace = THREE.SRGBColorSpace;
         }}
         shadows

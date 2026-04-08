@@ -197,9 +197,9 @@ export function CameraRig({ activeStop, lookBiasRef, pairRigRef, phase }: Camera
     const desiredPosition = stopMode
       ? activeConfig
         ? new THREE.Vector3(
-          activeConfig.stopCamera.x + (phoneDateStop ? -0.98 : phoneActivityShot ? -0.22 : phoneDrinksShot ? -0.08 : 0) + sway * 0.08,
-            activeConfig.stopCamera.y + (phoneDateStop ? 0.34 : phoneDrinksShot ? 0.18 : isPhonePortrait ? 0.18 : 0) + driftY * 0.18,
-            activeConfig.stopCamera.z + (phoneDateStop ? -0.74 : phoneDrinksShot ? 0.24 : isPhonePortrait ? 0.38 : 0)
+          activeConfig.stopCamera.x + (phoneDateStop ? -0.62 : phoneActivityShot ? -0.22 : phoneDrinksShot ? -0.08 : 0) + sway * 0.08,
+            activeConfig.stopCamera.y + (phoneDateStop ? 0.24 : phoneDrinksShot ? 0.18 : isPhonePortrait ? 0.18 : 0) + driftY * 0.18,
+            activeConfig.stopCamera.z + (phoneDateStop ? -0.28 : phoneDrinksShot ? 0.24 : isPhonePortrait ? 0.38 : 0)
           )
         : new THREE.Vector3(
             pair.position.x - (isPhonePortrait ? 1.26 : 3.08) + lookBias.x * 0.12 + sway * 0.28,

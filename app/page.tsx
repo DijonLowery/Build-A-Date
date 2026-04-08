@@ -484,6 +484,7 @@ export default function Page() {
 
       {phase === "selectingDinner" ? (
         <ChoicePanel
+          compact
           confirmLabel="Set dinner here"
           eyebrow="Plaza dinner district"
           onClose={handlePanelClose}
@@ -501,6 +502,7 @@ export default function Page() {
 
       {phase === "selectingActivity" ? (
         <ChoicePanel
+          compact
           confirmLabel="Let this be the vibe"
           eyebrow="Power & Light district"
           onClose={handlePanelClose}
@@ -517,6 +519,7 @@ export default function Page() {
 
       {phase === "selectingDrinks" ? (
         <ChoicePanel
+          compact
           confirmLabel="Keep the night here"
           eyebrow="Rooftop finale"
           onClose={handlePanelClose}

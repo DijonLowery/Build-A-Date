@@ -17,9 +17,10 @@ export function WorldPostProcessing({
 }) {
   const composerRef = useRef<EffectComposer | null>(null);
   const { camera, gl, scene, size } = useThree();
+  const disabled = mobileView || reducedDetail;
 
   useEffect(() => {
-    if (!reducedDetail) {
+    if (!disabled) {
       return undefined;
     }
 
@@ -27,15 +28,15 @@ export function WorldPostProcessing({
     composerRef.current = null;
 
     return undefined;
-  }, [reducedDetail]);
+  }, [disabled]);
 
   const passes = useMemo(() => {
-    if (reducedDetail) {
+    if (disabled) {
       return null;
     }
 
     const renderPass = new RenderPass(scene, camera);
-    const ssaoPass = mobileView ? null : new SSAOPass(scene, camera, size.width, size.height);
+    const ssaoPass = new SSAOPass(scene, camera, size.width, size.height);
 
     if (ssaoPass) {
       ssaoPass.kernelRadius = 16;
@@ -51,7 +52,7 @@ export function WorldPostProcessing({
     );
 
     return { bloomPass, renderPass, ssaoPass };
-  }, [camera, mobileView, reducedDetail, scene, size.height, size.width]);
+  }, [camera, disabled, mobileView, scene, size.height, size.width]);
 
   useEffect(() => {
     if (!passes) {
@@ -77,16 +78,16 @@ export function WorldPostProcessing({
   }, [gl, mobileView, passes, size.height, size.width]);
 
   useEffect(() => {
-    if (!composerRef.current || reducedDetail) {
+    if (!composerRef.current || disabled) {
       return;
     }
 
     composerRef.current?.setSize(size.width, size.height);
     composerRef.current?.setPixelRatio(Math.min(window.devicePixelRatio, mobileView ? 1.7 : 1.35));
-  }, [mobileView, reducedDetail, size.height, size.width]);
+  }, [disabled, mobileView, size.height, size.width]);
 
   useFrame(() => {
-    if (!reducedDetail) {
+    if (!disabled) {
       composerRef.current?.render();
     }
   }, 1);

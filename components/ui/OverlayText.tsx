@@ -57,7 +57,7 @@ export function OverlayText({
 
         <div className="panel-wrap panel-wrap-first-stop">
           <button className="primary-button first-stop-button" onClick={onDateOpen} type="button">
-            Choose the night
+            Tap here to choose the night
           </button>
         </div>
       </>
