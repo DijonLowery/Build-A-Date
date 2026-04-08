@@ -1,7 +1,6 @@
 "use client";
 
-import { Text } from "@react-three/drei";
-
+import { SafeSceneText } from "@/components/world/SafeSceneText";
 import { activityFocusPosition } from "@/lib/routeConfig";
 
 type ActivityCueProps = {
@@ -30,14 +29,14 @@ export function ActivityCue({ active, onOpen, selectedLabel }: ActivityCueProps)
         <meshBasicMaterial color="#98c5ff" opacity={active ? 0.22 : 0.12} transparent />
       </mesh>
 
-      <Text color="#f7f9ff" fontSize={0.084} letterSpacing={0.14} position={[0, 0.38, 0.18]} textAlign="center">
+      <SafeSceneText color="#f7f9ff" fontSize={0.084} letterSpacing={0.14} position={[0, 0.38, 0.18]} textAlign="center">
         NIGHTLIFE DISTRICT
-      </Text>
+      </SafeSceneText>
 
       {selectedLabel ? (
-        <Text color="#b9d2ff" fontSize={0.068} maxWidth={1.56} position={[0, -0.4, 0.18]} textAlign="center">
+        <SafeSceneText color="#b9d2ff" fontSize={0.068} maxWidth={1.56} position={[0, -0.4, 0.18]} textAlign="center">
           {selectedLabel}
-        </Text>
+        </SafeSceneText>
       ) : null}
 
       <pointLight color="#8fbcff" distance={7.6} intensity={active ? 1.18 : 0.66} position={[0, 1.32, 0.84]} />

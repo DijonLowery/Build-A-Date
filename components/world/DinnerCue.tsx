@@ -1,7 +1,6 @@
 "use client";
 
-import { Text } from "@react-three/drei";
-
+import { SafeSceneText } from "@/components/world/SafeSceneText";
 import { dinnerFocusPosition } from "@/lib/routeConfig";
 
 type DinnerCueProps = {
@@ -30,14 +29,14 @@ export function DinnerCue({ active, onOpen, selectedLabel }: DinnerCueProps) {
         <meshBasicMaterial color="#ffd6ab" opacity={active ? 0.22 : 0.1} transparent />
       </mesh>
 
-      <Text color="#fff3e7" fontSize={0.074} letterSpacing={0.14} position={[0, 0.22, 0.2]} textAlign="center">
+      <SafeSceneText color="#fff3e7" fontSize={0.074} letterSpacing={0.14} position={[0, 0.22, 0.2]} textAlign="center">
         DINNER DISTRICT
-      </Text>
+      </SafeSceneText>
 
       {selectedLabel ? (
-        <Text color="#ffd8a8" fontSize={0.062} maxWidth={1.34} position={[0, -0.42, 0.18]} textAlign="center">
+        <SafeSceneText color="#ffd8a8" fontSize={0.062} maxWidth={1.34} position={[0, -0.42, 0.18]} textAlign="center">
           {selectedLabel}
-        </Text>
+        </SafeSceneText>
       ) : null}
 
       <pointLight color="#ffbf79" distance={6.8} intensity={active ? 1 : 0.72} position={[0, 1.16, 0.7]} />

@@ -1,7 +1,6 @@
 "use client";
 
-import { Text } from "@react-three/drei";
-
+import { SafeSceneText } from "@/components/world/SafeSceneText";
 import { drinksFocusPosition } from "@/lib/routeConfig";
 
 type DrinksCueProps = {
@@ -33,17 +32,17 @@ export function DrinksCue({ active, onOpen, selectedLabel }: DrinksCueProps) {
         <meshBasicMaterial color="#ffd4a8" opacity={active ? 0.2 : 0.08} transparent />
       </mesh>
 
-      <Text color="#fff5ea" fontSize={0.082} letterSpacing={0.14} position={[0, 0.34, 0.18]} textAlign="center">
+      <SafeSceneText color="#fff5ea" fontSize={0.082} letterSpacing={0.14} position={[0, 0.34, 0.18]} textAlign="center">
         ROOFTOP FINALE
-      </Text>
-      <Text color="#ffd9ad" fontSize={0.06} maxWidth={1.56} position={[0, 0.62, 0.18]} textAlign="center">
+      </SafeSceneText>
+      <SafeSceneText color="#ffd9ad" fontSize={0.06} maxWidth={1.56} position={[0, 0.62, 0.18]} textAlign="center">
         one more stop
-      </Text>
+      </SafeSceneText>
 
       {selectedLabel ? (
-        <Text color="#ffd9ad" fontSize={0.066} maxWidth={1.4} position={[0, -0.42, 0.18]} textAlign="center">
+        <SafeSceneText color="#ffd9ad" fontSize={0.066} maxWidth={1.4} position={[0, -0.42, 0.18]} textAlign="center">
           {selectedLabel}
-        </Text>
+        </SafeSceneText>
       ) : null}
 
       <pointLight color="#ffc892" distance={8.2} intensity={active ? 1.06 : 0.6} position={[0, 1.24, 0.84]} />

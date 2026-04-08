@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 const TRACK_SRC = "/audio/cry-for-you-instrumental.mp3";
 const TARGET_VOLUME = 0.16;
 const AUDIO_UNLOCK_EVENT = "build-a-date-audio-unlock";
+const AUDIO_STOP_EVENT = "build-a-date-audio-stop";
 
 function clampVolume(value: number) {
   return Math.max(0, Math.min(1, value));
@@ -144,6 +145,7 @@ export function AmbientAudio() {
     window.addEventListener("click", handleFirstGesture, { passive: true });
     window.addEventListener("keydown", handleFirstGesture);
     window.addEventListener(AUDIO_UNLOCK_EVENT, handleFirstGesture);
+    window.addEventListener(AUDIO_STOP_EVENT, pausePlayback);
 
     void startPlayback();
 
@@ -155,6 +157,7 @@ export function AmbientAudio() {
       window.removeEventListener("click", handleFirstGesture);
       window.removeEventListener("keydown", handleFirstGesture);
       window.removeEventListener(AUDIO_UNLOCK_EVENT, handleFirstGesture);
+      window.removeEventListener(AUDIO_STOP_EVENT, pausePlayback);
       stopFade();
       audio.pause();
       audio.src = "";
@@ -179,5 +182,11 @@ export function AmbientAudio() {
 export function requestAmbientAudioStart() {
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(AUDIO_UNLOCK_EVENT));
+  }
+}
+
+export function requestAmbientAudioStop() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(AUDIO_STOP_EVENT));
   }
 }

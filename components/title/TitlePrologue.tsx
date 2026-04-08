@@ -6,9 +6,10 @@ import { TitleHeroImage } from "@/components/title/TitleHeroImage";
 
 type TitlePrologueProps = {
   onBegin: () => void;
+  preparing?: boolean;
 };
 
-export function TitlePrologue({ onBegin }: TitlePrologueProps) {
+export function TitlePrologue({ onBegin, preparing = false }: TitlePrologueProps) {
   return (
     <section className="title-prologue" aria-label="Build-A-Date title prologue">
       <div className="title-backdrop" aria-hidden="true">
@@ -22,7 +23,7 @@ export function TitlePrologue({ onBegin }: TitlePrologueProps) {
         </div>
 
         <div className="title-scene-vignette" />
-        <TitleCopy onBegin={onBegin} />
+        <TitleCopy onBegin={onBegin} preparing={preparing} />
         <div className="title-foreground-haze" aria-hidden="true" />
         <PetalOverlay count={6} variant="title" />
       </div>

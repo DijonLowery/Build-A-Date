@@ -2,8 +2,9 @@
 
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { MeshReflectorMaterial, RoundedBox, Sparkles, Text } from "@react-three/drei";
+import { MeshReflectorMaterial, RoundedBox, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
+import { SafeSceneText } from "@/components/world/SafeSceneText";
 import { useSurfaceMaps } from "@/components/world/useSurfaceMaps";
 import { useWorldAssets } from "@/components/world/useWorldAssets";
 
@@ -261,12 +262,12 @@ function LiveSoulRoom({
         <meshBasicMaterial color="#f1b177" opacity={active ? 0.12 : 0.04} transparent />
       </mesh>
 
-      <Text color="#fff1df" fontSize={0.34} letterSpacing={0.06} position={[0, 4.62, 0.08]} textAlign="center">
+      <SafeSceneText color="#fff1df" fontSize={0.34} letterSpacing={0.06} position={[0, 4.62, 0.08]} textAlign="center">
         soul in the room
-      </Text>
-      <Text color="#c5dfff" fontSize={0.14} letterSpacing={0.12} position={[0, 4.12, 0.08]} textAlign="center">
+      </SafeSceneText>
+      <SafeSceneText color="#c5dfff" fontSize={0.14} letterSpacing={0.12} position={[0, 4.12, 0.08]} textAlign="center">
         live band at the back
-      </Text>
+      </SafeSceneText>
 
       <Performer accent="#f0bf8d" active={active} kind="bass" position={[-2.14, 0.48, 0.92]} />
       <Performer accent="#d0b6e1" active={active} kind="drums" position={[0, 0.44, -0.08]} />

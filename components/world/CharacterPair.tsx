@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import type { MutableRefObject } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useAnimations, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
@@ -76,6 +76,7 @@ function ModelAvatar({
   const rootRef = useRef<THREE.Group | null>(null);
   const isMadison = variant === "madison";
   const phaseShift = isMadison ? 0.82 : 0;
+  const { gl } = useThree();
   const { scene, animations } = useGLTF(modelPath);
   const model = useMemo(() => clone(scene), [scene]);
   const { actions, names } = useAnimations(animations, model);
@@ -106,6 +107,44 @@ function ModelAvatar({
       scale: normalizedScale
     };
   }, [model, targetHeight]);
+
+  useEffect(() => {
+    const maxAnisotropy = Math.min(gl.capabilities.getMaxAnisotropy(), 12);
+
+    model.traverse((child) => {
+      if (!("material" in child)) {
+        return;
+      }
+
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+
+      materials.forEach((material) => {
+        if (!(material instanceof THREE.Material)) {
+          return;
+        }
+
+        const map = ("map" in material ? material.map : null) as THREE.Texture | null;
+        const normalMap = ("normalMap" in material ? material.normalMap : null) as THREE.Texture | null;
+
+        if (map) {
+          map.colorSpace = THREE.SRGBColorSpace;
+          map.anisotropy = maxAnisotropy;
+          map.minFilter = THREE.LinearMipmapLinearFilter;
+          map.magFilter = THREE.LinearFilter;
+          map.needsUpdate = true;
+        }
+
+        if (normalMap) {
+          normalMap.anisotropy = maxAnisotropy;
+          normalMap.minFilter = THREE.LinearMipmapLinearFilter;
+          normalMap.magFilter = THREE.LinearFilter;
+          normalMap.needsUpdate = true;
+        }
+
+        material.needsUpdate = true;
+      });
+    });
+  }, [gl, model]);
 
   useEffect(() => {
     const walkClip = names.find((name) => /walk|stroll|stride/i.test(name));

@@ -8,7 +8,13 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { SSAOPass } from "three/examples/jsm/postprocessing/SSAOPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 
-export function WorldPostProcessing({ reducedDetail = false }: { reducedDetail?: boolean }) {
+export function WorldPostProcessing({
+  mobileView = false,
+  reducedDetail = false
+}: {
+  mobileView?: boolean;
+  reducedDetail?: boolean;
+}) {
   const composerRef = useRef<EffectComposer | null>(null);
   const { camera, gl, scene, size } = useThree();
 
@@ -29,20 +35,23 @@ export function WorldPostProcessing({ reducedDetail = false }: { reducedDetail?:
     }
 
     const renderPass = new RenderPass(scene, camera);
-    const ssaoPass = new SSAOPass(scene, camera, size.width, size.height);
-    ssaoPass.kernelRadius = 16;
-    ssaoPass.minDistance = 0.003;
-    ssaoPass.maxDistance = 0.14;
+    const ssaoPass = mobileView ? null : new SSAOPass(scene, camera, size.width, size.height);
+
+    if (ssaoPass) {
+      ssaoPass.kernelRadius = 16;
+      ssaoPass.minDistance = 0.003;
+      ssaoPass.maxDistance = 0.14;
+    }
 
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(size.width, size.height),
-      0.28,
-      0.44,
-      0.8
+      mobileView ? 0.08 : 0.28,
+      mobileView ? 0.14 : 0.44,
+      mobileView ? 0.96 : 0.8
     );
 
     return { bloomPass, renderPass, ssaoPass };
-  }, [camera, reducedDetail, scene, size.height, size.width]);
+  }, [camera, mobileView, reducedDetail, scene, size.height, size.width]);
 
   useEffect(() => {
     if (!passes) {
@@ -51,19 +60,21 @@ export function WorldPostProcessing({ reducedDetail = false }: { reducedDetail?:
 
     const composer = new EffectComposer(gl);
     composer.addPass(passes.renderPass);
-    composer.addPass(passes.ssaoPass);
+    if (passes.ssaoPass) {
+      composer.addPass(passes.ssaoPass);
+    }
     composer.addPass(passes.bloomPass);
     composer.setSize(size.width, size.height);
-    composer.setPixelRatio(Math.min(window.devicePixelRatio, 1.35));
+    composer.setPixelRatio(Math.min(window.devicePixelRatio, mobileView ? 1.7 : 1.35));
     composerRef.current = composer;
 
     return () => {
       composer.dispose();
       passes.bloomPass.dispose();
-      passes.ssaoPass.dispose();
+      passes.ssaoPass?.dispose();
       composerRef.current = null;
     };
-  }, [gl, passes, size.height, size.width]);
+  }, [gl, mobileView, passes, size.height, size.width]);
 
   useEffect(() => {
     if (!composerRef.current || reducedDetail) {
@@ -71,8 +82,8 @@ export function WorldPostProcessing({ reducedDetail = false }: { reducedDetail?:
     }
 
     composerRef.current?.setSize(size.width, size.height);
-    composerRef.current?.setPixelRatio(Math.min(window.devicePixelRatio, 1.35));
-  }, [reducedDetail, size.height, size.width]);
+    composerRef.current?.setPixelRatio(Math.min(window.devicePixelRatio, mobileView ? 1.7 : 1.35));
+  }, [mobileView, reducedDetail, size.height, size.width]);
 
   useFrame(() => {
     if (!reducedDetail) {

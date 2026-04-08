@@ -1,9 +1,10 @@
 "use client";
 
-import { MeshReflectorMaterial, RoundedBox, Sparkles, Text } from "@react-three/drei";
+import { MeshReflectorMaterial, RoundedBox, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 import { BillboardTree } from "@/components/world/BillboardTree";
 import { ScenicPlate } from "@/components/world/ScenicPlate";
+import { SafeSceneText } from "@/components/world/SafeSceneText";
 import { useSurfaceMaps } from "@/components/world/useSurfaceMaps";
 import { useWorldAssets } from "@/components/world/useWorldAssets";
 
@@ -150,12 +151,12 @@ function WarmFacade({
         <planeGeometry args={[2.18, 0.34]} />
         <meshBasicMaterial color="#fff2df" opacity={emphasized ? 0.96 : 0.82} transparent />
       </mesh>
-      <Text color="#fff6ec" fontSize={0.18} maxWidth={2.5} position={[0, 1.9, 1.2]} textAlign="center">
+      <SafeSceneText color="#fff6ec" fontSize={0.18} maxWidth={2.5} position={[0, 1.9, 1.2]} textAlign="center">
         {label}
-      </Text>
-      <Text color={emphasized ? "#ffdcb0" : "#f5dcc0"} fontSize={0.14} maxWidth={2.2} position={[0, 2.34, 1.2]} textAlign="center">
+      </SafeSceneText>
+      <SafeSceneText color={emphasized ? "#ffdcb0" : "#f5dcc0"} fontSize={0.14} maxWidth={2.2} position={[0, 2.34, 1.2]} textAlign="center">
         {cue}
-      </Text>
+      </SafeSceneText>
 
       {emphasized ? <pointLight color="#ffbf78" distance={8.5} intensity={1.18} position={[0, 2.26, 1.5]} /> : null}
     </group>
@@ -262,7 +263,7 @@ export function PlazaSegment({ active, reducedDetail = false, selectedDinnerId }
 
   return (
     <>
-      <ScenicPlate path="/world/plaza-courtyard-night.svg" position={[1.8, 8.2, -76.4]} scale={[36.2, 18.8, 1]} />
+      <ScenicPlate opacity={reducedDetail ? 0.78 : 1} path="/world/plaza-courtyard-night.svg" position={[1.8, 8.2, -76.4]} scale={[36.2, 18.8, 1]} />
       <mesh position={[1.8, 7.9, -74.1]}>
         <planeGeometry args={[34, 8.2]} />
         <meshBasicMaterial color="#ffc89b" opacity={active ? 0.12 : 0.06} transparent />

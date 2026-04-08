@@ -1,9 +1,11 @@
 "use client";
 
-import { MeshReflectorMaterial, Sparkles, Text } from "@react-three/drei";
+import { MeshReflectorMaterial, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
+import type { JourneyPhase } from "@/components/world/RouteController";
 import { BillboardTree } from "@/components/world/BillboardTree";
 import { ScenicPlate } from "@/components/world/ScenicPlate";
+import { SafeSceneText } from "@/components/world/SafeSceneText";
 import { useSurfaceMaps } from "@/components/world/useSurfaceMaps";
 import { useWorldAssets } from "@/components/world/useWorldAssets";
 
@@ -113,9 +115,9 @@ function Facade({
         <planeGeometry args={[2.12, 0.34]} />
         <meshBasicMaterial color="#fff3e4" opacity={0.76} transparent />
       </mesh>
-      <Text color="#fff5e7" fontSize={0.2} maxWidth={2.8} position={[0, 1.82, 1.2]} textAlign="center">
+      <SafeSceneText color="#fff5e7" fontSize={0.2} maxWidth={2.8} position={[0, 1.82, 1.2]} textAlign="center">
         {sign}
-      </Text>
+      </SafeSceneText>
     </group>
   );
 }
@@ -164,11 +166,30 @@ function Planter({ position, surfaces }: { position: [number, number, number]; s
   );
 }
 
-export function StreetcarSegment({ plazaActive = false, reducedDetail = false }: { plazaActive?: boolean; reducedDetail?: boolean }) {
+export function StreetcarSegment({
+  phase,
+  plazaActive = false,
+  reducedDetail = false
+}: {
+  phase: JourneyPhase;
+  plazaActive?: boolean;
+  reducedDetail?: boolean;
+}) {
   const { metalnessMap } = useSurfaceMaps();
   const surfaces = useWorldAssets();
   const leftLamps = Array.from({ length: 8 }, (_, index) => [-5.9, 0, 14 - index * 8] as [number, number, number]);
   const rightLamps = Array.from({ length: 8 }, (_, index) => [5.8, 0, 10 - index * 8] as [number, number, number]);
+  const mainStreetFeatured =
+    phase === "introBrief" ||
+    phase === "walkingDate" ||
+    phase === "arrivedDate" ||
+    phase === "selectingDate" ||
+    phase === "lockedDate" ||
+    phase === "leavingDate" ||
+    phase === "walkingDinner" ||
+    phase === "arrivedDinner" ||
+    phase === "selectingDinner" ||
+    phase === "lockedDinner";
 
   return (
     <>
@@ -234,42 +255,41 @@ export function StreetcarSegment({ plazaActive = false, reducedDetail = false }:
         ))}
       </group>
 
-      {leftLamps.map((position, index) => (
+      {(mainStreetFeatured ? leftLamps : leftLamps.slice(0, 3)).map((position, index) => (
         <Lamp key={`left-lamp-${index}`} position={position} />
       ))}
-      {rightLamps.map((position, index) => (
+      {(mainStreetFeatured ? rightLamps : rightLamps.slice(0, 3)).map((position, index) => (
         <Lamp key={`right-lamp-${index}`} position={position} />
       ))}
 
-      {!plazaActive ? <Skyline surfaces={surfaces} /> : null}
+      {mainStreetFeatured && !plazaActive ? <Skyline surfaces={surfaces} /> : null}
 
-      {!plazaActive ? (
+      {mainStreetFeatured && !plazaActive ? (
         <>
-          <ScenicPlate opacity={0.88} path="/world/main-street-night.svg" position={[0.18, 9.3, -42.2]} scale={[42.5, 22.4, 1]} />
+          <ScenicPlate opacity={reducedDetail ? 0.72 : 0.88} path="/world/main-street-night.svg" position={[0.18, 9.3, -42.2]} scale={[42.5, 22.4, 1]} />
         </>
       ) : null}
 
-      <Facade accent="#6f4742" position={[-7.2, 0, -10]} scale={[1.08, 1, 1]} sign="LATE HOURS" surfaces={surfaces} tone="#9b7a6d" warm />
-      <Facade accent="#2e5273" position={[-7.1, 0, -22]} scale={[0.96, 1.08, 1]} sign="JAZZ ROOM" surfaces={surfaces} tone="#8e9096" />
-      <Facade accent="#865048" position={[7.15, 0, -12]} scale={[1, 1.06, 1]} sign="CITY TABLE" surfaces={surfaces} tone="#a18274" warm />
-      <Facade accent="#3f5c7c" position={[7.22, 0, -24]} scale={[1.02, 1, 1]} sign="STREETCAR STOP" surfaces={surfaces} tone="#8f9299" />
-
-      {!plazaActive ? <Facade accent="#5d4138" position={[-7.35, 0, -33]} scale={[1.08, 1.2, 1]} sign="MAIN STREET" surfaces={surfaces} tone="#9a7b6e" warm /> : null}
-      {!plazaActive ? <Facade accent="#805545" position={[7.38, 0, -35]} scale={[1.1, 1.16, 1]} sign="NIGHT MARKET" surfaces={surfaces} tone="#9d7e72" warm /> : null}
-
-      {!plazaActive ? <StreetcarShelter /> : null}
-
-      <BillboardTree glowColor="#ffceb7" glowIntensity={0.18} map={surfaces.treeBillboard} position={[-6.68, 0, 4]} scale={0.98} tint="#ffe4eb" />
-      <BillboardTree glowColor="#ffceb7" glowIntensity={0.16} map={surfaces.treeBillboard} position={[6.84, 0, -3]} scale={0.92} tint="#ffe3e9" />
-      {!plazaActive ? <BillboardTree glowColor="#ffceb7" glowIntensity={0.16} map={surfaces.treeBillboard} position={[6.38, 0, -20]} scale={1.04} tint="#ffe3ea" /> : null}
-
-      <Planter position={[-5.56, 0, 6.4]} surfaces={surfaces} />
-      <Planter position={[5.62, 0, -9.6]} surfaces={surfaces} />
-
-      <mesh position={[0, 6.4, -18]}>
-        <planeGeometry args={[22, 16]} />
-        <meshBasicMaterial color="#3c3243" opacity={0.12} transparent />
-      </mesh>
+      {mainStreetFeatured ? (
+        <>
+          <Facade accent="#6f4742" position={[-7.2, 0, -10]} scale={[1.08, 1, 1]} sign="LATE HOURS" surfaces={surfaces} tone="#9b7a6d" warm />
+          <Facade accent="#2e5273" position={[-7.1, 0, -22]} scale={[0.96, 1.08, 1]} sign="JAZZ ROOM" surfaces={surfaces} tone="#8e9096" />
+          <Facade accent="#865048" position={[7.15, 0, -12]} scale={[1, 1.06, 1]} sign="CITY TABLE" surfaces={surfaces} tone="#a18274" warm />
+          <Facade accent="#3f5c7c" position={[7.22, 0, -24]} scale={[1.02, 1, 1]} sign="STREETCAR STOP" surfaces={surfaces} tone="#8f9299" />
+          {!plazaActive ? <Facade accent="#5d4138" position={[-7.35, 0, -33]} scale={[1.08, 1.2, 1]} sign="MAIN STREET" surfaces={surfaces} tone="#9a7b6e" warm /> : null}
+          {!plazaActive ? <Facade accent="#805545" position={[7.38, 0, -35]} scale={[1.1, 1.16, 1]} sign="NIGHT MARKET" surfaces={surfaces} tone="#9d7e72" warm /> : null}
+          {!plazaActive ? <StreetcarShelter /> : null}
+          <BillboardTree glowColor="#ffceb7" glowIntensity={0.18} map={surfaces.treeBillboard} position={[-6.68, 0, 4]} scale={0.98} tint="#ffe4eb" />
+          <BillboardTree glowColor="#ffceb7" glowIntensity={0.16} map={surfaces.treeBillboard} position={[6.84, 0, -3]} scale={0.92} tint="#ffe3e9" />
+          {!plazaActive ? <BillboardTree glowColor="#ffceb7" glowIntensity={0.16} map={surfaces.treeBillboard} position={[6.38, 0, -20]} scale={1.04} tint="#ffe3ea" /> : null}
+          <Planter position={[-5.56, 0, 6.4]} surfaces={surfaces} />
+          <Planter position={[5.62, 0, -9.6]} surfaces={surfaces} />
+          <mesh position={[0, 6.4, -18]}>
+            <planeGeometry args={[22, 16]} />
+            <meshBasicMaterial color="#3c3243" opacity={0.12} transparent />
+          </mesh>
+        </>
+      ) : null}
 
       <Sparkles color="#ffd1ac" count={reducedDetail ? 12 : 36} opacity={0.1} position={[0, 4.6, -12]} scale={[14, 6, 54]} size={2.4} speed={0.12} />
     </>

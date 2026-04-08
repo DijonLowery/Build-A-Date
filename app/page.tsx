@@ -3,7 +3,7 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 import { PetalOverlay } from "@/components/title/PetalOverlay";
-import { AmbientAudio, requestAmbientAudioStart } from "@/components/ui/AmbientAudio";
+import { AmbientAudio, requestAmbientAudioStart, requestAmbientAudioStop } from "@/components/ui/AmbientAudio";
 import { TitlePrologue } from "@/components/title/TitlePrologue";
 import { ChoicePanel } from "@/components/ui/ChoicePanel";
 import { FinalReveal } from "@/components/ui/FinalReveal";
@@ -17,12 +17,15 @@ import { dinnerOptions } from "@/lib/dinnerOptions";
 import { drinksOptions } from "@/lib/drinksOptions";
 
 export default function Page() {
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://made4madison.vercel.app").replace(/\/$/, "");
   const [phase, setPhase] = useState<JourneyPhase>("prologue");
+  const [startRequested, setStartRequested] = useState(false);
   const [selectedDateId, setSelectedDateId] = useState<string | null>(null);
   const [selectedDinnerId, setSelectedDinnerId] = useState<string | null>(null);
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
   const [selectedDrinksId, setSelectedDrinksId] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [worldPrepared, setWorldPrepared] = useState(false);
   const datePromptOpenedRef = useRef(false);
 
   const selectedDate = useMemo(
@@ -41,6 +44,20 @@ export default function Page() {
     () => drinksOptions.find((option) => option.id === selectedDrinksId) ?? null,
     [selectedDrinksId]
   );
+
+  useEffect(() => {
+    if (!startRequested || !worldPrepared || phase !== "prologue") {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      startTransition(() => {
+        setSubmitted(false);
+        setPhase("transition");
+        setStartRequested(false);
+      });
+    });
+  }, [phase, startRequested, worldPrepared]);
 
   useEffect(() => {
     if (phase !== "transition") {
@@ -84,7 +101,7 @@ export default function Page() {
     const timeoutId = window.setTimeout(() => {
       datePromptOpenedRef.current = true;
       setPhase((current) => (current === "arrivedDate" ? "selectingDate" : current));
-    }, 1800);
+    }, 3200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -126,7 +143,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedDinner" ? "selectingDinner" : current));
-    }, 2700);
+    }, 3200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -140,7 +157,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingActivity");
-    }, 3800);
+    }, 4600);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -154,7 +171,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedActivity" ? "selectingActivity" : current));
-    }, 2600);
+    }, 3400);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -168,7 +185,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingDrinks");
-    }, 5000);
+    }, 6400);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -182,7 +199,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedDrinks" ? "selectingDrinks" : current));
-    }, 3900);
+    }, 4600);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -205,18 +222,17 @@ export default function Page() {
 
   function handleStart() {
     requestAmbientAudioStart();
-    window.requestAnimationFrame(() => {
-      startTransition(() => {
-        setPhase((current) => {
-          if (current !== "prologue") {
-            return current;
-          }
+    setStartRequested(true);
 
+    if (worldPrepared && phase === "prologue") {
+      window.requestAnimationFrame(() => {
+        startTransition(() => {
           setSubmitted(false);
-          return "transition";
+          setPhase("transition");
+          setStartRequested(false);
         });
       });
-    });
+    }
   }
 
   function handleIntroContinue() {
@@ -355,7 +371,9 @@ export default function Page() {
       return;
     }
 
-    const summary = `Build-A-Date\nDate: ${selectedDate.label}\nDinner: ${selectedDinner.label}\nActivity: ${selectedActivity.label}\nDrinks: ${selectedDrinks.label}\n\nAll you have to do is show up.`;
+    requestAmbientAudioStop();
+
+    const summary = `${siteUrl}\n\nBuild-A-Date\nDate: ${selectedDate.label}\nDinner: ${selectedDinner.label}\nActivity: ${selectedActivity.label}\nDrinks: ${selectedDrinks.label}\n\nAll you have to do is show up.`;
     const userAgent = window.navigator.userAgent;
     const isMobile = /Android|iPhone|iPad|iPod/i.test(userAgent);
     const isAppleMobile = /iPhone|iPad|iPod/i.test(userAgent);
@@ -389,7 +407,7 @@ export default function Page() {
               : "scene-layer-hidden scene-layer-title"
         }`}
       >
-        <TitlePrologue onBegin={handleStart} />
+        <TitlePrologue onBegin={handleStart} preparing={startRequested && !worldPrepared} />
       </div>
 
       <div
@@ -407,6 +425,7 @@ export default function Page() {
           onBoardOpen={handleBoardOpen}
           onDinnerOpen={handleDinnerOpen}
           onDrinksOpen={handleDrinksOpen}
+          onWorldReady={() => setWorldPrepared(true)}
           phase={phase}
           selectedActivityId={selectedActivityId}
           selectedDinnerId={selectedDinnerId}

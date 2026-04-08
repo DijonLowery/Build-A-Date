@@ -874,6 +874,15 @@ button {
   transform: scale(0.985);
 }
 
+.title-begin-button:disabled {
+  cursor: default;
+  opacity: 0.82;
+  transform: none;
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 236, 210, 0.06);
+}
+
 .title-foreground-haze {
   pointer-events: none;
   position: absolute;
@@ -1002,6 +1011,18 @@ button {
 
 .world-gradient {
   background: linear-gradient(180deg, rgba(6, 8, 12, 0.12) 0%, rgba(6, 8, 12, 0.08) 45%, rgba(6, 8, 12, 0.56) 100%);
+}
+
+@media (max-width: 768px) {
+  .world-vignette {
+    background:
+      radial-gradient(circle at center, transparent 58%, rgba(0, 0, 0, 0.14) 100%),
+      linear-gradient(180deg, rgba(4, 5, 8, 0.01), rgba(4, 5, 8, 0.04));
+  }
+
+  .world-gradient {
+    background: linear-gradient(180deg, rgba(10, 10, 16, 0.01) 0%, rgba(10, 10, 16, 0.02) 42%, rgba(10, 10, 16, 0.14) 100%);
+  }
 }
 
 .overlay {

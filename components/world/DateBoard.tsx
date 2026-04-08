@@ -1,7 +1,7 @@
 "use client";
 
-import { Text } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
+import { SafeSceneText } from "@/components/world/SafeSceneText";
 import { boardPosition } from "@/lib/routeConfig";
 
 type DateBoardProps = {
@@ -15,7 +15,7 @@ export function DateBoard({ active: _active, onOpen: _onOpen, selectedLabel }: D
   const isPhonePortrait = size.width <= 560 && size.height > size.width;
 
   return (
-    <group position={boardPosition} scale={isPhonePortrait ? 0.6 : 0.64}>
+    <group position={boardPosition} scale={isPhonePortrait ? 0.78 : 0.64}>
       <group rotation={[0, Math.PI, 0]}>
         <mesh castShadow position={[0, -1.4, 0]}>
           <capsuleGeometry args={[0.08, 2.62, 10, 18]} />
@@ -60,17 +60,41 @@ export function DateBoard({ active: _active, onOpen: _onOpen, selectedLabel }: D
           </mesh>
         ))}
 
-        <Text color="#fff5e8" fontSize={0.125} letterSpacing={0.14} position={[0, 1.06, 0.2]} textAlign="center">
+        <SafeSceneText
+          color="#fff5e8"
+          fontSize={isPhonePortrait ? 0.156 : 0.125}
+          letterSpacing={0.14}
+          outlineColor="#09111a"
+          outlineWidth={0.006}
+          position={[0, 1.06, 0.2]}
+          textAlign="center"
+        >
           PICK THE NIGHT
-        </Text>
-        <Text color="#fff3e0" fontSize={0.06} letterSpacing={0.16} position={[0, 0.78, 0.2]} textAlign="center">
+        </SafeSceneText>
+        <SafeSceneText
+          color="#fff3e0"
+          fontSize={isPhonePortrait ? 0.078 : 0.06}
+          letterSpacing={0.16}
+          outlineColor="#0d1620"
+          outlineWidth={0.004}
+          position={[0, 0.78, 0.2]}
+          textAlign="center"
+        >
           MAIN STREET BOARD
-        </Text>
+        </SafeSceneText>
 
         {selectedLabel ? (
-          <Text color="#ffd7a6" fontSize={0.08} letterSpacing={0.09} position={[0, -0.92, 0.2]} textAlign="center">
+          <SafeSceneText
+            color="#ffd7a6"
+            fontSize={isPhonePortrait ? 0.104 : 0.08}
+            letterSpacing={0.09}
+            outlineColor="#311917"
+            outlineWidth={0.004}
+            position={[0, -0.92, 0.2]}
+            textAlign="center"
+          >
             {selectedLabel.toUpperCase()}
-          </Text>
+          </SafeSceneText>
         ) : null}
 
         <pointLight color="#86c7ff" distance={7.4} intensity={0.92} position={[0, 1.2, 1]} />

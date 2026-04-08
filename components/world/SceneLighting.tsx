@@ -7,16 +7,58 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import type { JourneyPhase } from "@/components/world/RouteController";
 
+const HDRI_PATHS = [
+  "/hdri/sunset_jhbcentral_1k.hdr",
+  "/hdri/rooftop_night_1k.hdr",
+  "/hdri/modern_evening_street_1k.hdr"
+] as const;
+
+function EnvironmentLighting({
+  environmentFile,
+  plazaActive,
+  powerActive,
+  rooftopActive
+}: {
+  environmentFile: string;
+  plazaActive: boolean;
+  powerActive: boolean;
+  rooftopActive: boolean;
+}) {
+  const { gl, scene } = useThree();
+  const hdriTexture = useLoader(RGBELoader, environmentFile);
+
+  useEffect(() => {
+    const pmremGenerator = new THREE.PMREMGenerator(gl);
+    pmremGenerator.compileEquirectangularShader();
+
+    const envMap = pmremGenerator.fromEquirectangular(hdriTexture).texture;
+    scene.environment = envMap;
+    scene.environmentIntensity = rooftopActive ? 0.92 : plazaActive ? 0.96 : powerActive ? 0.88 : 0.94;
+
+    return () => {
+      if (scene.environment === envMap) {
+        scene.environment = null;
+      }
+      envMap.dispose();
+      pmremGenerator.dispose();
+    };
+  }, [gl, hdriTexture, scene, plazaActive, powerActive, rooftopActive]);
+
+  return null;
+}
+
 export function SceneLighting({
   phase,
   plazaActive = false,
   powerActive = false,
-  rooftopActive = false
+  rooftopActive = false,
+  mobileView = false
 }: {
   phase: JourneyPhase;
   plazaActive?: boolean;
   powerActive?: boolean;
   rooftopActive?: boolean;
+  mobileView?: boolean;
 }) {
   const { gl, scene } = useThree();
   const plazaLightRef = useRef<THREE.PointLight>(null);
@@ -43,28 +85,9 @@ export function SceneLighting({
           ? "/hdri/rooftop_night_1k.hdr"
           : "/hdri/modern_evening_street_1k.hdr";
 
-  const hdriTexture = useLoader(RGBELoader, environmentFile);
-
   useEffect(() => {
     RectAreaLightUniformsLib.init();
   }, []);
-
-  useEffect(() => {
-    const pmremGenerator = new THREE.PMREMGenerator(gl);
-    pmremGenerator.compileEquirectangularShader();
-
-    const envMap = pmremGenerator.fromEquirectangular(hdriTexture).texture;
-    scene.environment = envMap;
-    scene.environmentIntensity = rooftopActive ? 0.92 : plazaActive ? 0.96 : powerActive ? 0.88 : 0.94;
-
-    return () => {
-      if (scene.environment === envMap) {
-        scene.environment = null;
-      }
-      envMap.dispose();
-      pmremGenerator.dispose();
-    };
-  }, [gl, hdriTexture, scene, plazaActive, powerActive, rooftopActive]);
 
   useEffect(() => {
     if (plazaSpotRef.current && plazaTargetRef.current) {
@@ -118,28 +141,41 @@ export function SceneLighting({
 
   return (
     <>
-      <ambientLight intensity={rooftopActive ? 0.3 : powerActive ? 0.42 : plazaActive ? 0.52 : 0.48} />
+      {!mobileView ? (
+        <EnvironmentLighting
+          environmentFile={environmentFile}
+          plazaActive={plazaActive}
+          powerActive={powerActive}
+          rooftopActive={rooftopActive}
+        />
+      ) : null}
+      <ambientLight intensity={mobileView ? (rooftopActive ? 0.76 : powerActive ? 0.9 : plazaActive ? 1.02 : 0.96) : rooftopActive ? 0.3 : powerActive ? 0.42 : plazaActive ? 0.52 : 0.48} />
       <hemisphereLight
         args={
           plazaActive
-            ? ["#f2b492", "#2c1c1a", 0.82]
+            ? ["#f2b492", "#2c1c1a", mobileView ? 1.22 : 0.82]
             : phase === "introBrief" || phase === "walkingDate" || phase === "arrivedDate" || phase === "selectingDate" || phase === "lockedDate" || phase === "leavingDate"
-              ? ["#efb28f", "#332028", 0.9]
+              ? ["#efb28f", "#332028", mobileView ? 1.34 : 0.9]
               : rooftopActive
-                ? ["#b6b8de", "#1d1520", 0.56]
-                : ["#8ea6c7", "#241722", 0.72]
+                ? ["#b6b8de", "#1d1520", mobileView ? 1.02 : 0.56]
+                : ["#8ea6c7", "#241722", mobileView ? 1.08 : 0.72]
         }
       />
 
       <directionalLight
         castShadow
         color="#ffd6ad"
-        intensity={rooftopActive ? 0.9 : 1.16}
+        intensity={mobileView ? (rooftopActive ? 1.38 : 1.64) : rooftopActive ? 0.9 : 1.16}
         position={[8.4, 12, 16]}
         shadow-bias={-0.00008}
         shadow-mapSize-height={1024}
         shadow-mapSize-width={1024}
       />
+
+      <pointLight color="#ffd6a3" distance={58} intensity={mobileView ? 1.36 : 0.54} position={[0.6, 8.4, -18]} />
+      <pointLight color="#9cc2ff" distance={64} intensity={mobileView ? 0.88 : 0.24} position={[0, 11.2, -36]} />
+      <pointLight color="#ffc38e" distance={54} intensity={mobileView ? 1.06 : 0.34} position={[0, 5.4, -68]} />
+      <pointLight color="#fff0d2" distance={44} intensity={mobileView ? 1.12 : 0.22} position={[0.2, 3.6, 6]} />
 
       <object3D position={[1.8, 0.8, -65.8]} ref={plazaTargetRef} />
       <spotLight
@@ -210,3 +246,7 @@ export function SceneLighting({
     </>
   );
 }
+
+HDRI_PATHS.forEach((path) => {
+  useLoader.preload(RGBELoader, path);
+});
