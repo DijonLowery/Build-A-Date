@@ -62,13 +62,13 @@ function MobileStreetBase() {
     <group position={[0, -0.01, -12]}>
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[9.4, 86]} />
-        <meshStandardMaterial color="#5a4347" roughness={0.74} metalness={0.08} />
+        <meshBasicMaterial color="#594347" />
       </mesh>
 
       {[-6.52, 6.52].map((x) => (
         <mesh key={x} position={[x, 0.01, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[3.82, 86]} />
-          <meshStandardMaterial color="#938b8d" roughness={0.92} />
+          <meshBasicMaterial color="#a39c9f" />
         </mesh>
       ))}
 
@@ -78,6 +78,21 @@ function MobileStreetBase() {
           <meshStandardMaterial color="#a0a2aa" metalness={0.52} roughness={0.26} />
         </mesh>
       ))}
+
+      {[-5.9, 5.8].flatMap((x) =>
+        Array.from({ length: 6 }, (_, index) => (
+          <group key={`${x}-${index}`} position={[x, 0, 12 - index * 10]}>
+            <mesh position={[0, 1.95, 0]}>
+              <cylinderGeometry args={[0.045, 0.06, 3.9, 12]} />
+              <meshBasicMaterial color="#2f3137" />
+            </mesh>
+            <mesh position={[0.34, 3.34, 0]}>
+              <sphereGeometry args={[0.18, 12, 12]} />
+              <meshBasicMaterial color="#ffd6a6" />
+            </mesh>
+          </group>
+        ))
+      )}
     </group>
   );
 }
@@ -252,11 +267,27 @@ export function WorldCanvas({
 
         {isPhonePortrait ? (
           <>
+            <MobileHorizonBackdrop />
+            <MobileStreetBase />
             <SceneLighting mobileView={true} phase={phase} plazaActive={plazaActive} powerActive={powerActive} rooftopActive={rooftopActive} />
-            <StreetcarSegment phase={phase} plazaActive={plazaActive} reducedDetail={reducedDetail} />
-            {plazaMounted ? <PlazaSegment active={plazaActive} reducedDetail={reducedDetail} selectedDinnerId={selectedDinnerId} /> : null}
-            {powerMounted ? <PowerLightSegment active={powerActive} reducedDetail={reducedDetail} selectedActivityId={selectedActivityId} /> : null}
-            {rooftopMounted ? <RooftopSegment active={rooftopActive} phase={phase} reducedDetail={reducedDetail} selectedDrinksId={selectedDrinksId} /> : null}
+            <Suspense fallback={null}>
+              <StreetcarSegment phase={phase} plazaActive={plazaActive} reducedDetail={reducedDetail} />
+            </Suspense>
+            {plazaMounted ? (
+              <Suspense fallback={null}>
+                <PlazaSegment active={plazaActive} reducedDetail={reducedDetail} selectedDinnerId={selectedDinnerId} />
+              </Suspense>
+            ) : null}
+            {powerMounted ? (
+              <Suspense fallback={null}>
+                <PowerLightSegment active={powerActive} reducedDetail={reducedDetail} selectedActivityId={selectedActivityId} />
+              </Suspense>
+            ) : null}
+            {rooftopMounted ? (
+              <Suspense fallback={null}>
+                <RooftopSegment active={rooftopActive} phase={phase} reducedDetail={reducedDetail} selectedDrinksId={selectedDrinksId} />
+              </Suspense>
+            ) : null}
 
             <DateBoard active={boardActive} onOpen={onBoardOpen} selectedLabel={selectedDate?.shortLabel ?? null} />
             {plazaActive ? <DinnerCue active={dinnerActive} onOpen={onDinnerOpen} selectedLabel={selectedDinner?.label ?? null} /> : null}
