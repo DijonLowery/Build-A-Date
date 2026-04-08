@@ -455,11 +455,11 @@ export default function Page() {
           onConfirm={handleConfirmDate}
           onSelect={setSelectedDateId}
           options={dateOptions}
-          panelCopy="Main Street kept the board lit for a reason. Pick the night, and let the rest of the city fall into place."
+          panelCopy="Main Street kept the board lit for a reason. Swipe through the lit weekends, then tap the night that feels right."
           selectedId={selectedDateId}
           selectedNote="The city heard you clearly"
           title="First... pick the night."
-          unselectedNote="Pick one of the lit windows to wake the route."
+          unselectedNote="Swipe the weekends, then tap one to wake the route."
         />
       ) : null}
 

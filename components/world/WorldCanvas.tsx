@@ -143,7 +143,7 @@ export function WorldCanvas({
           {powerActive ? <PowerLightSegment active={powerActive} reducedDetail={reducedDetail} selectedActivityId={selectedActivityId} /> : null}
           {rooftopActive ? <RooftopSegment active={rooftopActive} phase={phase} reducedDetail={reducedDetail} selectedDrinksId={selectedDrinksId} /> : null}
 
-          <group position={[0.12, 0, 14]} ref={pairRigRef} scale={1.22}>
+          <group position={[0.12, 0, 14]} ref={pairRigRef} scale={isPhonePortrait ? 1.08 : 1.22}>
             <pointLight color="#ffc995" distance={8.4} intensity={0.58} position={[0, 2.9, 2.8]} />
             <pointLight color="#83a6d3" distance={10} intensity={0.16} position={[0, 3.2, -2.4]} />
             <CharacterPair

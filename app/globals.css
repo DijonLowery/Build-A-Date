@@ -1453,18 +1453,35 @@ button {
 
 @media (max-width: 640px) {
   .choice-panel-compact {
-    width: min(100%, 22rem);
-    padding: 0.96rem 0.82rem 0.86rem;
+    width: min(100%, 21rem);
+    max-height: min(68svh, 31rem);
+    padding: 0.92rem 0.78rem 0.82rem;
     border-radius: 1.34rem;
+    overflow: hidden;
   }
 
   .date-grid-compact {
-    gap: 0.52rem;
+    display: flex;
+    gap: 0.56rem;
+    overflow-x: auto;
+    margin-right: -0.15rem;
+    padding-bottom: 0.12rem;
+    scroll-padding-inline: 0.25rem;
+    scroll-snap-type: x mandatory;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .date-grid-compact::-webkit-scrollbar {
+    display: none;
   }
 
   .date-card-compact {
-    padding: 0.72rem 0.66rem;
+    flex: 0 0 74%;
+    min-height: 8.1rem;
+    padding: 0.68rem 0.64rem;
     border-radius: 0.92rem;
+    scroll-snap-align: center;
   }
 
   .date-card-compact span {
@@ -1480,6 +1497,25 @@ button {
   .date-card-compact small {
     font-size: 0.68rem;
     line-height: 1.3;
+  }
+
+  .choice-panel-compact .panel-header h2 {
+    font-size: 1.56rem;
+  }
+
+  .choice-panel-compact .panel-copy {
+    margin-top: 0.8rem;
+    font-size: 0.84rem;
+    line-height: 1.52;
+  }
+
+  .choice-panel-compact .panel-footer {
+    gap: 0.72rem;
+    margin-top: 0.82rem;
+  }
+
+  .choice-panel-compact .selection-note {
+    padding: 0.82rem 0.88rem;
   }
 
   .world-prompt-date {
