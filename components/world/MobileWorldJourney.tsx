@@ -10,15 +10,14 @@ import { MobileCharacterStage } from "@/components/world/MobileCharacterStage";
 import type { JourneyPhase, JourneyStop } from "@/components/world/RouteController";
 
 const ARRIVAL_DELAYS: Record<JourneyStop, number> = {
-  activity: 6200,
-  date: 6200,
-  dinner: 5600,
-  drinks: 7000
+  activity: 7600,
+  date: 9000,
+  dinner: 6800,
+  drinks: 9000
 };
 
 function sceneForPhase(phase: JourneyPhase) {
   if (
-    phase === "walkingDrinks" ||
     phase === "arrivedDrinks" ||
     phase === "selectingDrinks" ||
     phase === "lockedDrinks" ||
@@ -28,7 +27,13 @@ function sceneForPhase(phase: JourneyPhase) {
     return "rooftop";
   }
 
-  if (phase === "walkingActivity" || phase === "arrivedActivity" || phase === "selectingActivity" || phase === "lockedActivity") {
+  if (
+    phase === "walkingDrinks" ||
+    phase === "walkingActivity" ||
+    phase === "arrivedActivity" ||
+    phase === "selectingActivity" ||
+    phase === "lockedActivity"
+  ) {
     return "activity";
   }
 
@@ -232,7 +237,7 @@ export function MobileWorldJourney({
   );
 
   const introWorld = phase === "introBrief";
-  const showMainScene = phase !== "prologue" && phase !== "transition";
+  const showMainScene = phase !== "prologue";
   const mainStrong =
     phase === "walkingDate" ||
     phase === "arrivedDate" ||
@@ -249,16 +254,18 @@ export function MobileWorldJourney({
     phase === "submitted";
   const plazaVisible =
     plazaStrong || phase === "leavingDate" || phase === "walkingDinner" || phase === "walkingActivity";
-  const plazaPrewarm = phase === "leavingDate" || phase === "walkingDinner" || phase === "walkingActivity";
+  const plazaWalking = phase === "leavingDate" || phase === "walkingDinner";
+  const plazaPrewarm = phase === "walkingActivity";
   const showPlazaCue =
     phase === "arrivedDinner" || phase === "selectingDinner" || phase === "lockedDinner";
-  const activityVisible =
-    activityStrong || phase === "lockedDinner" || phase === "walkingActivity" || phase === "walkingDrinks";
-  const activityPrewarm = phase === "lockedDinner" || phase === "walkingActivity" || phase === "walkingDrinks";
+  const activityWalking = phase === "walkingActivity";
+  const activityVisible = activityStrong || activityWalking || phase === "lockedDinner";
+  const activityPrewarm = phase === "lockedDinner";
   const showActivityCue =
     phase === "arrivedActivity" || phase === "selectingActivity" || phase === "lockedActivity";
-  const rooftopVisible = rooftopStrong || phase === "lockedActivity" || phase === "walkingDrinks";
-  const rooftopPrewarm = phase === "lockedActivity" || phase === "walkingDrinks";
+  const rooftopWalking = phase === "walkingDrinks";
+  const rooftopVisible = rooftopStrong || rooftopWalking || phase === "lockedActivity";
+  const rooftopPrewarm = phase === "lockedActivity";
   const showRooftopCue =
     phase === "arrivedDrinks" ||
     phase === "selectingDrinks" ||
@@ -274,7 +281,15 @@ export function MobileWorldJourney({
           introWorld ? " mobile-scene-intro" : ""
         }${mainStrong ? " mobile-scene-hero" : ""}`}
       >
-        <img alt="" className="mobile-scene-image" src="/world/main-street-night.svg" />
+        <div className="mobile-main-skyline" />
+        <img
+          alt=""
+          className="mobile-scene-image"
+          decoding="async"
+          fetchPriority="high"
+          loading="eager"
+          src="/world/main-street-night.svg"
+        />
         <div className="mobile-scene-road mobile-scene-road-main" />
         <div className="mobile-scene-rails" />
         <div className="mobile-scene-lamps" />
@@ -284,10 +299,10 @@ export function MobileWorldJourney({
       <div
         className={`mobile-scene-layer mobile-scene-plaza${plazaVisible ? " mobile-scene-visible" : ""}${
           plazaPrewarm ? " mobile-scene-prewarm" : ""
-        }${plazaStrong ? " mobile-scene-hero" : ""}`}
+        }${plazaWalking ? " mobile-scene-walking" : ""}${plazaStrong ? " mobile-scene-hero" : ""}`}
       >
         <div className="mobile-world-sky mobile-world-sky-plaza" />
-        <img alt="" className="mobile-scene-image" src="/world/plaza-courtyard-night.svg" />
+        <img alt="" className="mobile-scene-image" decoding="async" loading="eager" src="/world/plaza-courtyard-night.svg" />
         <div className="mobile-scene-road mobile-scene-road-plaza" />
         <div className="mobile-plaza-tables">
           <span />
@@ -306,16 +321,22 @@ export function MobileWorldJourney({
       <div
         className={`mobile-scene-layer mobile-scene-activity${activityVisible ? " mobile-scene-visible" : ""}${
           activityPrewarm ? " mobile-scene-prewarm" : ""
-        }${activityStrong ? " mobile-scene-hero" : ""}`}
+        }${activityWalking ? " mobile-scene-walking" : ""}${activityStrong ? " mobile-scene-hero" : ""}`}
       >
         <div className="mobile-world-sky mobile-world-sky-activity" />
-        <img alt="" className="mobile-scene-image" src="/world/power-light-soul-stage.svg" />
-        <div className="mobile-stage-room" />
-        <div className="mobile-stage-band">
-          <span className="mobile-stage-performer mobile-stage-singer" />
-          <span className="mobile-stage-performer mobile-stage-guitar" />
-          <span className="mobile-stage-performer mobile-stage-drums" />
-        </div>
+        <img alt="" className="mobile-scene-image" decoding="async" loading="eager" src="/world/power-light-soul-stage.svg" />
+        {showActivityCue ? (
+          <>
+            <div className="mobile-stage-room" />
+            <div className="mobile-stage-band">
+              <span className="mobile-stage-performer mobile-stage-singer" />
+              <span className="mobile-stage-performer mobile-stage-guitar" />
+              <span className="mobile-stage-performer mobile-stage-drums" />
+            </div>
+          </>
+        ) : (
+          <div className="mobile-stage-room mobile-stage-room-prewarm" />
+        )}
         {showActivityCue ? (
           <div className="mobile-scene-cue mobile-scene-cue-activity">
             <span>Power &amp; Light</span>
@@ -327,15 +348,21 @@ export function MobileWorldJourney({
       <div
         className={`mobile-scene-layer mobile-scene-rooftop${rooftopVisible ? " mobile-scene-visible" : ""}${
           rooftopPrewarm ? " mobile-scene-prewarm" : ""
-        }${rooftopStrong ? " mobile-scene-hero" : ""}`}
+        }${rooftopWalking ? " mobile-scene-walking mobile-scene-rooftop-walk" : ""}${rooftopStrong ? " mobile-scene-hero" : ""}`}
       >
         <div className="mobile-world-sky mobile-world-sky-rooftop" />
         <div className="mobile-rooftop-stars" />
         <div className="mobile-rooftop-haze" />
         <div className="mobile-rooftop-skyline" />
-        <div className="mobile-rooftop-deck" />
-        <div className="mobile-rooftop-rail" />
-        <div className="mobile-rooftop-table" />
+        {showRooftopCue ? (
+          <>
+            <div className="mobile-rooftop-deck" />
+            <div className="mobile-rooftop-rail" />
+            <div className="mobile-rooftop-table" />
+          </>
+        ) : (
+          <div className="mobile-rooftop-rise" />
+        )}
         {showRooftopCue ? (
           <div className="mobile-scene-cue mobile-scene-cue-rooftop">
             <span>Rooftop finale</span>

@@ -165,7 +165,7 @@ export default function Page() {
     const timeoutId = window.setTimeout(() => {
       datePromptOpenedRef.current = true;
       setPhase((current) => (current === "arrivedDate" ? "selectingDate" : current));
-    }, 4300);
+    }, 5200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -179,7 +179,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("leavingDate");
-    }, 3400);
+    }, 5000);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -193,7 +193,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingDinner");
-    }, 5600);
+    }, 6200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -221,7 +221,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingActivity");
-    }, 6200);
+    }, 7200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -249,7 +249,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingDrinks");
-    }, 7800);
+    }, 8600);
 
     return () => {
       window.clearTimeout(timeoutId);

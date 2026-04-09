@@ -129,9 +129,7 @@ export function WorldCanvas({
 }: WorldCanvasProps) {
   const lookBiasRef = useRef({ x: 0, y: 0 });
   const pairRigRef = useRef<THREE.Group | null>(null);
-  const [isPhonePortrait, setIsPhonePortrait] = useState(
-    () => typeof window !== "undefined" && window.innerWidth <= 768 && window.innerHeight > window.innerWidth
-  );
+  const [isPhonePortrait, setIsPhonePortrait] = useState(false);
   const [worldAssetsReady, setWorldAssetsReady] = useState(false);
   const [debugBaseOnly, setDebugBaseOnly] = useState(false);
   const [debugNoCharacters, setDebugNoCharacters] = useState(false);
