@@ -17,6 +17,7 @@ import { RouteController, type JourneyPhase, type JourneyStop } from "@/componen
 import { RooftopSegment } from "@/components/world/RooftopSegment";
 import { SceneLighting } from "@/components/world/SceneLighting";
 import { StreetcarSegment } from "@/components/world/StreetcarSegment";
+import { MobileWorldJourney } from "@/components/world/MobileWorldJourney";
 import { WorldPostProcessing } from "@/components/world/WorldPostProcessing";
 import { activityOptions } from "@/lib/activityOptions";
 import { dateOptions } from "@/lib/dateOptions";
@@ -128,8 +129,14 @@ export function WorldCanvas({
 }: WorldCanvasProps) {
   const lookBiasRef = useRef({ x: 0, y: 0 });
   const pairRigRef = useRef<THREE.Group | null>(null);
-  const [isPhonePortrait, setIsPhonePortrait] = useState(false);
+  const [isPhonePortrait, setIsPhonePortrait] = useState(
+    () => typeof window !== "undefined" && window.innerWidth <= 768 && window.innerHeight > window.innerWidth
+  );
   const [worldAssetsReady, setWorldAssetsReady] = useState(false);
+  const [debugBaseOnly, setDebugBaseOnly] = useState(false);
+  const [debugNoCharacters, setDebugNoCharacters] = useState(false);
+  const [debugNoLighting, setDebugNoLighting] = useState(false);
+  const [debugSolidWorld, setDebugSolidWorld] = useState(false);
 
   useEffect(() => {
     function updateViewportFlags() {
@@ -142,6 +149,18 @@ export function WorldCanvas({
     return () => {
       window.removeEventListener("resize", updateViewportFlags);
     };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    setDebugBaseOnly(params.has("debugBaseOnly"));
+    setDebugNoCharacters(params.has("debugNoCharacters"));
+    setDebugNoLighting(params.has("debugNoLighting"));
+    setDebugSolidWorld(params.has("debugSolidWorld"));
   }, []);
 
   useEffect(() => {
@@ -184,6 +203,31 @@ export function WorldCanvas({
   const selectedDinner = dinnerOptions.find((option) => option.id === selectedDinnerId) ?? null;
   const selectedActivity = activityOptions.find((option) => option.id === selectedActivityId) ?? null;
   const selectedDrinks = drinksOptions.find((option) => option.id === selectedDrinksId) ?? null;
+
+  if (isPhonePortrait) {
+    return (
+      <div
+        className={`world-stage${transitioning ? " world-stage-emerging" : ""}`}
+        onPointerLeave={handlePointerLeave}
+      >
+        <MobileWorldJourney
+          onArrive={onArrive}
+          onWorldReady={() => {
+            setWorldAssetsReady(true);
+            onWorldReady?.();
+          }}
+          phase={phase}
+          selectedActivityId={selectedActivityId}
+          selectedDateId={selectedDateId}
+          selectedDinnerId={selectedDinnerId}
+          selectedDrinksId={selectedDrinksId}
+        />
+        <div className="world-vignette" />
+        <div className="world-gradient" />
+      </div>
+    );
+  }
+
   const boardActive = phase === "arrivedDate" || phase === "selectingDate";
   const dinnerActive = phase === "arrivedDinner" || phase === "selectingDinner" || phase === "lockedDinner";
   const activityActive = phase === "arrivedActivity" || phase === "selectingActivity" || phase === "lockedActivity";
@@ -241,52 +285,78 @@ export function WorldCanvas({
         }}
         shadows
       >
-        <fogExp2 args={[isPhonePortrait ? "#5a4360" : "#2a1a2e", isPhonePortrait ? 0.008 : 0.02]} attach="fog" />
+        {!debugSolidWorld ? <fogExp2 args={[isPhonePortrait ? "#5a4360" : "#2a1a2e", isPhonePortrait ? 0.008 : 0.02]} attach="fog" /> : null}
 
-        <DuskSkybox mobileView={isPhonePortrait} />
-        <RouteController onArrive={onArrive} pairRigRef={pairRigRef} phase={phase} />
-        <CameraRig activeStop={activeStop} lookBiasRef={lookBiasRef} pairRigRef={pairRigRef} phase={phase} />
+        {!debugSolidWorld ? <DuskSkybox mobileView={isPhonePortrait} /> : <color args={["#f08b6e"]} attach="background" />}
+        {!debugSolidWorld ? <RouteController onArrive={onArrive} pairRigRef={pairRigRef} phase={phase} /> : null}
+        {!debugSolidWorld ? <CameraRig activeStop={activeStop} lookBiasRef={lookBiasRef} pairRigRef={pairRigRef} phase={phase} /> : null}
 
         <group position={[0.12, 0, 14]} ref={pairRigRef} scale={isPhonePortrait ? 1.08 : 1.22}>
-          <pointLight color="#ffc995" distance={8.4} intensity={isPhonePortrait ? 1.14 : 0.58} position={[0, 2.9, 2.8]} />
-          <pointLight color="#83a6d3" distance={12} intensity={isPhonePortrait ? 0.42 : 0.16} position={[0, 3.2, -2.4]} />
-          <Suspense fallback={null}>
-            <CharacterPair
-              facingBoard={activeStop !== null}
-              phase={phase}
-              walking={
-                phase === "walkingDate" ||
-                phase === "leavingDate" ||
-                phase === "walkingDinner" ||
-                phase === "walkingActivity" ||
-                phase === "walkingDrinks"
-              }
-            />
-          </Suspense>
+          {!debugNoLighting ? <pointLight color="#ffc995" distance={8.4} intensity={isPhonePortrait ? 1.14 : 0.58} position={[0, 2.9, 2.8]} /> : null}
+          {!debugNoLighting ? <pointLight color="#83a6d3" distance={12} intensity={isPhonePortrait ? 0.42 : 0.16} position={[0, 3.2, -2.4]} /> : null}
+          {!debugNoCharacters ? (
+            <Suspense fallback={null}>
+              <CharacterPair
+                facingBoard={activeStop !== null}
+                phase={phase}
+                walking={
+                  phase === "walkingDate" ||
+                  phase === "leavingDate" ||
+                  phase === "walkingDinner" ||
+                  phase === "walkingActivity" ||
+                  phase === "walkingDrinks"
+                }
+              />
+            </Suspense>
+          ) : (
+            <mesh position={[0, 1, 0]}>
+              <sphereGeometry args={[0.55, 18, 18]} />
+              <meshBasicMaterial color="#ffd38e" />
+            </mesh>
+          )}
         </group>
 
         {isPhonePortrait ? (
           <>
-            <MobileHorizonBackdrop />
-            <MobileStreetBase />
-            <SceneLighting mobileView={true} phase={phase} plazaActive={plazaActive} powerActive={powerActive} rooftopActive={rooftopActive} />
-            <Suspense fallback={null}>
-              <StreetcarSegment phase={phase} plazaActive={plazaActive} reducedDetail={reducedDetail} />
-            </Suspense>
-            {plazaMounted ? (
-              <Suspense fallback={null}>
-                <PlazaSegment active={plazaActive} reducedDetail={reducedDetail} selectedDinnerId={selectedDinnerId} />
-              </Suspense>
-            ) : null}
-            {powerMounted ? (
-              <Suspense fallback={null}>
-                <PowerLightSegment active={powerActive} reducedDetail={reducedDetail} selectedActivityId={selectedActivityId} />
-              </Suspense>
-            ) : null}
-            {rooftopMounted ? (
-              <Suspense fallback={null}>
-                <RooftopSegment active={rooftopActive} phase={phase} reducedDetail={reducedDetail} selectedDrinksId={selectedDrinksId} />
-              </Suspense>
+            {debugSolidWorld ? (
+              <group>
+                <mesh position={[0, 0, -8]}>
+                  <planeGeometry args={[30, 30]} />
+                  <meshBasicMaterial color="#ff9966" />
+                </mesh>
+                <mesh position={[0, -4, -6]} rotation={[-Math.PI / 2, 0, 0]}>
+                  <planeGeometry args={[30, 30]} />
+                  <meshBasicMaterial color="#6d415e" />
+                </mesh>
+              </group>
+            ) : (
+              <>
+                <MobileHorizonBackdrop />
+                <MobileStreetBase />
+                {!debugNoLighting ? <SceneLighting mobileView={true} phase={phase} plazaActive={plazaActive} powerActive={powerActive} rooftopActive={rooftopActive} /> : null}
+              </>
+            )}
+            {!debugBaseOnly ? (
+              <>
+                <Suspense fallback={null}>
+                  <StreetcarSegment phase={phase} plazaActive={plazaActive} reducedDetail={reducedDetail} />
+                </Suspense>
+                {plazaMounted ? (
+                  <Suspense fallback={null}>
+                    <PlazaSegment active={plazaActive} reducedDetail={reducedDetail} selectedDinnerId={selectedDinnerId} />
+                  </Suspense>
+                ) : null}
+                {powerMounted ? (
+                  <Suspense fallback={null}>
+                    <PowerLightSegment active={powerActive} reducedDetail={reducedDetail} selectedActivityId={selectedActivityId} />
+                  </Suspense>
+                ) : null}
+                {rooftopMounted ? (
+                  <Suspense fallback={null}>
+                    <RooftopSegment active={rooftopActive} phase={phase} reducedDetail={reducedDetail} selectedDrinksId={selectedDrinksId} />
+                  </Suspense>
+                ) : null}
+              </>
             ) : null}
 
             <DateBoard active={boardActive} onOpen={onBoardOpen} selectedLabel={selectedDate?.shortLabel ?? null} />

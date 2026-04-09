@@ -28,6 +28,70 @@ export default function Page() {
   const [worldPrepared, setWorldPrepared] = useState(false);
   const datePromptOpenedRef = useRef(false);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+
+    const debugPhase = params.get("debugPhase") as JourneyPhase | null;
+
+    if (debugPhase) {
+      const firstDate = dateOptions[0]?.id ?? null;
+      const firstDinner = dinnerOptions[0]?.id ?? null;
+      const firstActivity = activityOptions[0]?.id ?? null;
+      const firstDrinks = drinksOptions[0]?.id ?? null;
+
+      const needsDate =
+        debugPhase !== "prologue" &&
+        debugPhase !== "transition" &&
+        debugPhase !== "introBrief" &&
+        debugPhase !== "walkingDate" &&
+        debugPhase !== "arrivedDate" &&
+        debugPhase !== "selectingDate";
+      const needsDinner =
+        debugPhase === "lockedDinner" ||
+        debugPhase === "walkingActivity" ||
+        debugPhase === "arrivedActivity" ||
+        debugPhase === "selectingActivity" ||
+        debugPhase === "lockedActivity" ||
+        debugPhase === "walkingDrinks" ||
+        debugPhase === "arrivedDrinks" ||
+        debugPhase === "selectingDrinks" ||
+        debugPhase === "lockedDrinks" ||
+        debugPhase === "finalReveal" ||
+        debugPhase === "submitted";
+      const needsActivity =
+        debugPhase === "lockedActivity" ||
+        debugPhase === "walkingDrinks" ||
+        debugPhase === "arrivedDrinks" ||
+        debugPhase === "selectingDrinks" ||
+        debugPhase === "lockedDrinks" ||
+        debugPhase === "finalReveal" ||
+        debugPhase === "submitted";
+      const needsDrinks =
+        debugPhase === "lockedDrinks" || debugPhase === "finalReveal" || debugPhase === "submitted";
+
+      setSelectedDateId(needsDate ? firstDate : null);
+      setSelectedDinnerId(needsDinner ? firstDinner : null);
+      setSelectedActivityId(needsActivity ? firstActivity : null);
+      setSelectedDrinksId(needsDrinks ? firstDrinks : null);
+      setWorldPrepared(true);
+      setStartRequested(false);
+      setPhase(debugPhase);
+      return;
+    }
+
+    if (!params.has("debugWorld")) {
+      return;
+    }
+
+    setWorldPrepared(true);
+    setStartRequested(false);
+    setPhase("walkingDate");
+  }, []);
+
   const selectedDate = useMemo(
     () => dateOptions.find((option) => option.id === selectedDateId) ?? null,
     [selectedDateId]
@@ -66,7 +130,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("introBrief");
-    }, 3200);
+    }, 4300);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -80,7 +144,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "introBrief" ? "walkingDate" : current));
-    }, 6800);
+    }, 7600);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -101,7 +165,7 @@ export default function Page() {
     const timeoutId = window.setTimeout(() => {
       datePromptOpenedRef.current = true;
       setPhase((current) => (current === "arrivedDate" ? "selectingDate" : current));
-    }, 3200);
+    }, 4300);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -115,7 +179,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("leavingDate");
-    }, 2800);
+    }, 3400);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -129,7 +193,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingDinner");
-    }, 4800);
+    }, 5600);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -143,7 +207,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedDinner" ? "selectingDinner" : current));
-    }, 3200);
+    }, 3800);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -157,7 +221,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingActivity");
-    }, 4600);
+    }, 6200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -171,7 +235,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedActivity" ? "selectingActivity" : current));
-    }, 3400);
+    }, 4700);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -185,7 +249,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingDrinks");
-    }, 6400);
+    }, 7800);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -199,7 +263,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedDrinks" ? "selectingDrinks" : current));
-    }, 4600);
+    }, 6200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -213,7 +277,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("finalReveal");
-    }, 5600);
+    }, 6600);
 
     return () => {
       window.clearTimeout(timeoutId);

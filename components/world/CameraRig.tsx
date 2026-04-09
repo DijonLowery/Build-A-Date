@@ -143,48 +143,48 @@ export function CameraRig({ activeStop, lookBiasRef, pairRigRef, phase }: Camera
     const driftY = Math.sin(state.clock.elapsedTime * 1.18) * 0.06;
 
     const defaultWalkPosition = new THREE.Vector3(
-      pair.position.x - (isPhonePortrait ? 0.82 : 1.46) + lookBias.x * (isPhonePortrait ? 0.12 : 0.2) + sway * (isPhonePortrait ? 0.44 : 0.82),
-      (isPhonePortrait ? 3.46 : 3.22) + driftY + lookBias.y * 0.1,
-      pair.position.z + (isPhonePortrait ? 10.6 : 9.14)
+      pair.position.x - (isPhonePortrait ? 1.06 : 1.46) + lookBias.x * (isPhonePortrait ? 0.08 : 0.2) + sway * (isPhonePortrait ? 0.24 : 0.82),
+      (isPhonePortrait ? 2.74 : 3.22) + driftY + lookBias.y * (isPhonePortrait ? 0.06 : 0.1),
+      pair.position.z + (isPhonePortrait ? 7.86 : 9.14)
     );
 
     const departurePosition = new THREE.Vector3(
-      pair.position.x - (isPhonePortrait ? 1.14 : 2.34) + lookBias.x * 0.14 + sway * (isPhonePortrait ? 0.34 : 0.56),
-      (isPhonePortrait ? 3.52 : 3.28) + driftY + lookBias.y * 0.08,
-      pair.position.z + (isPhonePortrait ? 10.24 : 8.94)
+      pair.position.x - (isPhonePortrait ? 1.16 : 2.34) + lookBias.x * (isPhonePortrait ? 0.08 : 0.14) + sway * (isPhonePortrait ? 0.22 : 0.56),
+      (isPhonePortrait ? 2.92 : 3.28) + driftY + lookBias.y * 0.06,
+      pair.position.z + (isPhonePortrait ? 7.52 : 8.94)
     );
 
     if (scenicConfig) {
       const distance = pair.position.distanceTo(scenicConfig.focus);
       const revealBlend = 1 - THREE.MathUtils.smootherstep(distance, 8, 22);
       const scenicFollow = new THREE.Vector3(
-        pair.position.x - (phoneDateTravel ? 1.12 : phoneActivityShot ? 0.94 : phoneDrinksShot ? 1.04 : 1.24) + lookBias.x * 0.14 + sway * 0.22,
-        (phoneDateTravel ? 4.02 : phoneDrinksShot ? 4.54 : isPhonePortrait ? 3.88 : 3.58) + driftY + lookBias.y * 0.08,
-        pair.position.z + (phoneDateTravel ? 14.2 : phoneDrinksShot ? 14.8 : isPhonePortrait ? 13.2 : 11.8)
+        pair.position.x - (phoneDateTravel ? 1.16 : phoneActivityShot ? 0.92 : phoneDrinksShot ? 0.96 : 1.24) + lookBias.x * (isPhonePortrait ? 0.08 : 0.14) + sway * (isPhonePortrait ? 0.16 : 0.22),
+        (phoneDateTravel ? 3.24 : phoneDrinksShot ? 3.92 : isPhonePortrait ? 3.06 : 3.58) + driftY + lookBias.y * (isPhonePortrait ? 0.05 : 0.08),
+        pair.position.z + (phoneDateTravel ? 9.4 : phoneDrinksShot ? 10.2 : isPhonePortrait ? 8.9 : 11.8)
       );
 
       scenicCamera.set(
             THREE.MathUtils.lerp(
               scenicFollow.x,
-              scenicConfig.revealCamera.x + (phoneDateTravel ? -0.28 : phoneActivityShot ? -0.16 : phoneDrinksShot ? 0.08 : 0) + sway * 0.08,
+              scenicConfig.revealCamera.x + (phoneDateTravel ? -0.22 : phoneActivityShot ? -0.14 : phoneDrinksShot ? 0.06 : 0) + sway * 0.06,
               revealBlend
             ),
             THREE.MathUtils.lerp(
               scenicFollow.y,
-              scenicConfig.revealCamera.y + (phoneDateTravel ? 0.28 : phoneDrinksShot ? 0.18 : 0) + driftY * 0.22,
+              scenicConfig.revealCamera.y + (phoneDateTravel ? -0.42 : phoneDrinksShot ? -0.24 : isPhonePortrait ? -0.34 : 0) + driftY * 0.18,
           revealBlend
         ),
             THREE.MathUtils.lerp(
               scenicFollow.z,
-              scenicConfig.revealCamera.z + (phoneDateTravel ? -0.32 : phoneDrinksShot ? 0.18 : isPhonePortrait ? 0.42 : 0),
+              scenicConfig.revealCamera.z + (phoneDateTravel ? 2.4 : phoneDrinksShot ? 1.4 : isPhonePortrait ? 2.1 : 0),
               revealBlend
             )
       );
 
       const scenicWalkLook = new THREE.Vector3(
-        pair.position.x + (phoneDateTravel ? 0.92 : phoneActivityShot ? 1.38 : phoneDrinksShot ? 0.96 : 1.18) + lookBias.x * 0.18,
-        (phoneDateTravel ? 1.9 : phoneDrinksShot ? 2.22 : 1.84) + lookBias.y * 0.08,
-        pair.position.z - (phoneDateTravel ? 6.6 : phoneDrinksShot ? 10.8 : 7.4)
+        pair.position.x + (phoneDateTravel ? 0.28 : phoneActivityShot ? 0.52 : phoneDrinksShot ? 0.42 : 1.18) + lookBias.x * (isPhonePortrait ? 0.08 : 0.18),
+        (phoneDateTravel ? 1.42 : phoneDrinksShot ? 1.84 : isPhonePortrait ? 1.48 : 1.84) + lookBias.y * (isPhonePortrait ? 0.04 : 0.08),
+        pair.position.z - (phoneDateTravel ? 12.6 : phoneDrinksShot ? 13.4 : isPhonePortrait ? 11.8 : 7.4)
       );
 
       scenicLook.set(
@@ -197,14 +197,14 @@ export function CameraRig({ activeStop, lookBiasRef, pairRigRef, phase }: Camera
     const desiredPosition = stopMode
       ? activeConfig
         ? new THREE.Vector3(
-          activeConfig.stopCamera.x + (phoneDateStop ? -0.62 : phoneActivityShot ? -0.22 : phoneDrinksShot ? -0.08 : 0) + sway * 0.08,
-            activeConfig.stopCamera.y + (phoneDateStop ? 0.24 : phoneDrinksShot ? 0.18 : isPhonePortrait ? 0.18 : 0) + driftY * 0.18,
-            activeConfig.stopCamera.z + (phoneDateStop ? -0.28 : phoneDrinksShot ? 0.24 : isPhonePortrait ? 0.38 : 0)
+          activeConfig.stopCamera.x + (phoneDateStop ? -0.42 : phoneActivityShot ? -0.18 : phoneDrinksShot ? -0.06 : 0) + sway * 0.06,
+            activeConfig.stopCamera.y + (phoneDateStop ? -0.62 : phoneDrinksShot ? -0.24 : isPhonePortrait ? -0.42 : 0) + driftY * 0.14,
+            activeConfig.stopCamera.z + (phoneDateStop ? 2.62 : phoneDrinksShot ? 1.64 : isPhonePortrait ? 2.14 : 0)
           )
         : new THREE.Vector3(
-            pair.position.x - (isPhonePortrait ? 1.26 : 3.08) + lookBias.x * 0.12 + sway * 0.28,
-            (isPhonePortrait ? 3.54 : 3.34) + driftY + lookBias.y * 0.08,
-            pair.position.z + (isPhonePortrait ? 10.3 : 8.72)
+            pair.position.x - (isPhonePortrait ? 1.1 : 3.08) + lookBias.x * (isPhonePortrait ? 0.08 : 0.12) + sway * (isPhonePortrait ? 0.2 : 0.28),
+            (isPhonePortrait ? 2.98 : 3.34) + driftY + lookBias.y * (isPhonePortrait ? 0.05 : 0.08),
+            pair.position.z + (isPhonePortrait ? 7.96 : 8.72)
           )
       : scenicConfig
         ? scenicCamera
@@ -217,9 +217,9 @@ export function CameraRig({ activeStop, lookBiasRef, pairRigRef, phase }: Camera
     perspectiveCamera.position.z = THREE.MathUtils.damp(perspectiveCamera.position.z, cameraTarget.z, 4.1, delta);
 
     const defaultWalkLook = new THREE.Vector3(
-      pair.position.x + (phoneDateTravel ? 0.16 : 0.34) + lookBias.x * 0.18,
-      (phoneDateTravel ? 1.84 : 1.78) + lookBias.y * 0.08,
-      pair.position.z - (phoneDateTravel ? 6.1 : 6.8)
+      pair.position.x + (phoneDateTravel ? 0.14 : 0.34) + lookBias.x * (isPhonePortrait ? 0.08 : 0.18),
+      (phoneDateTravel ? 1.36 : isPhonePortrait ? 1.44 : 1.78) + lookBias.y * (isPhonePortrait ? 0.04 : 0.08),
+      pair.position.z - (phoneDateTravel ? 11.8 : isPhonePortrait ? 10.8 : 6.8)
     );
 
     const stopLook = activeConfig
@@ -243,15 +243,15 @@ export function CameraRig({ activeStop, lookBiasRef, pairRigRef, phase }: Camera
             )
           )
       : new THREE.Vector3(
-          THREE.MathUtils.lerp(pair.position.x + 0.26, boardVector.x - 0.36, 0.48),
-          1.82,
-          THREE.MathUtils.lerp(pair.position.z - 1.3, boardVector.z - 0.22, 0.7)
+          THREE.MathUtils.lerp(pair.position.x + 0.18, boardVector.x - 0.34, 0.54),
+          isPhonePortrait ? 1.46 : 1.82,
+          THREE.MathUtils.lerp(pair.position.z - (isPhonePortrait ? 4.8 : 1.3), boardVector.z - 0.42, isPhonePortrait ? 0.84 : 0.7)
         );
 
     const departureLook = new THREE.Vector3(
-      THREE.MathUtils.lerp(pair.position.x + 0.42, boardVector.x + 0.34, 0.24),
-      1.8,
-      THREE.MathUtils.lerp(pair.position.z - 2.1, pair.position.z - 6.8, 0.56)
+      THREE.MathUtils.lerp(pair.position.x + 0.3, boardVector.x + 0.28, 0.24),
+      isPhonePortrait ? 1.42 : 1.8,
+      THREE.MathUtils.lerp(pair.position.z - (isPhonePortrait ? 4.6 : 2.1), pair.position.z - (isPhonePortrait ? 10.2 : 6.8), 0.56)
     );
 
     perspectiveCamera.lookAt(stopMode ? stopLook : departureMode ? departureLook : scenicConfig ? scenicLook : defaultWalkLook);
@@ -259,13 +259,13 @@ export function CameraRig({ activeStop, lookBiasRef, pairRigRef, phase }: Camera
     if (walking) {
       const targetFov =
         departureMode
-          ? isPhonePortrait ? 43.8 : 38.9
+          ? isPhonePortrait ? 55.6 : 38.9
           : scenicConfig
-            ? scenicConfig.travelFov + (phoneDateTravel ? 4.4 : phoneDrinksShot ? 3.6 : isPhonePortrait ? 3.2 : 0)
+            ? scenicConfig.travelFov + (phoneDateTravel ? 12.2 : phoneDrinksShot ? 8.6 : isPhonePortrait ? 9.2 : 0)
             : 39.5;
       perspectiveCamera.fov = THREE.MathUtils.damp(perspectiveCamera.fov, targetFov, 4, delta);
     } else {
-      const targetFov = activeConfig ? activeConfig.stopFov + (phoneDateStop ? 6.8 : phoneDrinksShot ? 3.2 : isPhonePortrait ? 3.6 : 0) : isPhonePortrait ? 40.6 : 36.2;
+      const targetFov = activeConfig ? activeConfig.stopFov + (phoneDateStop ? 10.8 : phoneDrinksShot ? 6.2 : isPhonePortrait ? 6.8 : 0) : isPhonePortrait ? 47.6 : 36.2;
       perspectiveCamera.fov = THREE.MathUtils.damp(perspectiveCamera.fov, targetFov, 4, delta);
     }
 
