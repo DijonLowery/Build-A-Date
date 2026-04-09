@@ -17,7 +17,6 @@ import { RouteController, type JourneyPhase, type JourneyStop } from "@/componen
 import { RooftopSegment } from "@/components/world/RooftopSegment";
 import { SceneLighting } from "@/components/world/SceneLighting";
 import { StreetcarSegment } from "@/components/world/StreetcarSegment";
-import { MobileWorldJourney } from "@/components/world/MobileWorldJourney";
 import { WorldPostProcessing } from "@/components/world/WorldPostProcessing";
 import { activityOptions } from "@/lib/activityOptions";
 import { dateOptions } from "@/lib/dateOptions";
@@ -176,55 +175,14 @@ export function WorldCanvas({
     onWorldReady?.();
   }, [isPhonePortrait, onWorldReady, worldAssetsReady]);
 
-  const mobileTransitionLite =
-    isPhonePortrait &&
-    (phase === "walkingDate" ||
-      phase === "walkingDinner" ||
-      phase === "walkingActivity" ||
-      phase === "walkingDrinks");
-  const mobileMenuLite =
-    isPhonePortrait &&
-    (phase === "selectingDate" ||
-      phase === "selectingDinner" ||
-      phase === "selectingActivity" ||
-      phase === "selectingDrinks" ||
-      phase === "arrivedDinner" ||
-      phase === "arrivedActivity" ||
-      phase === "arrivedDrinks");
   const reducedDetail =
     phase === "introBrief" ||
-    (transitioning && !worldAssetsReady) ||
-    mobileTransitionLite ||
-    mobileMenuLite;
+    (transitioning && !worldAssetsReady);
 
   const selectedDate = dateOptions.find((option) => option.id === selectedDateId) ?? null;
   const selectedDinner = dinnerOptions.find((option) => option.id === selectedDinnerId) ?? null;
   const selectedActivity = activityOptions.find((option) => option.id === selectedActivityId) ?? null;
   const selectedDrinks = drinksOptions.find((option) => option.id === selectedDrinksId) ?? null;
-
-  if (isPhonePortrait) {
-    return (
-      <div
-        className={`world-stage${transitioning ? " world-stage-emerging" : ""}`}
-        onPointerLeave={handlePointerLeave}
-      >
-        <MobileWorldJourney
-          onArrive={onArrive}
-          onWorldReady={() => {
-            setWorldAssetsReady(true);
-            onWorldReady?.();
-          }}
-          phase={phase}
-          selectedActivityId={selectedActivityId}
-          selectedDateId={selectedDateId}
-          selectedDinnerId={selectedDinnerId}
-          selectedDrinksId={selectedDrinksId}
-        />
-        <div className="world-vignette" />
-        <div className="world-gradient" />
-      </div>
-    );
-  }
 
   const boardActive = phase === "arrivedDate" || phase === "selectingDate";
   const dinnerActive = phase === "arrivedDinner" || phase === "selectingDinner" || phase === "lockedDinner";
