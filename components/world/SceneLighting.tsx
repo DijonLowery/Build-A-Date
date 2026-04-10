@@ -7,19 +7,15 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import type { JourneyPhase } from "@/components/world/RouteController";
 
-const HDRI_PATHS = [
-  "/hdri/sunset_jhbcentral_1k.hdr",
-  "/hdri/rooftop_night_1k.hdr",
-  "/hdri/modern_evening_street_1k.hdr"
-] as const;
-
 function EnvironmentLighting({
   environmentFile,
+  mobileView,
   plazaActive,
   powerActive,
   rooftopActive
 }: {
   environmentFile: string;
+  mobileView: boolean;
   plazaActive: boolean;
   powerActive: boolean;
   rooftopActive: boolean;
@@ -28,21 +24,33 @@ function EnvironmentLighting({
   const hdriTexture = useLoader(RGBELoader, environmentFile);
 
   useEffect(() => {
+    hdriTexture.mapping = THREE.EquirectangularReflectionMapping;
     const pmremGenerator = new THREE.PMREMGenerator(gl);
     pmremGenerator.compileEquirectangularShader();
 
     const envMap = pmremGenerator.fromEquirectangular(hdriTexture).texture;
     scene.environment = envMap;
-    scene.environmentIntensity = rooftopActive ? 0.92 : plazaActive ? 0.96 : powerActive ? 0.88 : 0.94;
+    scene.background = hdriTexture;
+    scene.backgroundBlurriness = rooftopActive ? 0.01 : powerActive ? 0.08 : plazaActive ? 0.12 : 0.16;
+    scene.backgroundIntensity = rooftopActive ? 0.9 : powerActive ? 0.88 : plazaActive ? 0.92 : 0.96;
+    scene.environmentIntensity = rooftopActive ? 0.98 : plazaActive ? 1.02 : powerActive ? 0.94 : 0.98;
+    scene.fog = new THREE.FogExp2(
+      rooftopActive ? "#5a3f45" : powerActive ? "#4c3445" : plazaActive ? "#51363c" : "#5e4348",
+      mobileView ? (rooftopActive ? 0.0068 : powerActive ? 0.013 : 0.011) : rooftopActive ? 0.0054 : powerActive ? 0.009 : 0.008
+    );
 
     return () => {
       if (scene.environment === envMap) {
         scene.environment = null;
       }
+      if (scene.background === hdriTexture) {
+        scene.background = null;
+      }
+      scene.fog = null;
       envMap.dispose();
       pmremGenerator.dispose();
     };
-  }, [gl, hdriTexture, scene, plazaActive, powerActive, rooftopActive]);
+  }, [gl, hdriTexture, mobileView, scene, plazaActive, powerActive, rooftopActive]);
 
   return null;
 }
@@ -79,11 +87,11 @@ export function SceneLighting({
       ? "/hdri/sunset_jhbcentral_1k.hdr"
       : plazaActive
         ? "/hdri/sunset_jhbcentral_1k.hdr"
-        : phase === "walkingDrinks"
+        : phase === "walkingDrinks" || rooftopActive
           ? "/hdri/sunset_jhbcentral_1k.hdr"
-        : rooftopActive
-          ? "/hdri/rooftop_night_1k.hdr"
-          : "/hdri/modern_evening_street_1k.hdr";
+          : powerActive
+            ? "/hdri/modern_evening_street_1k.hdr"
+            : "/hdri/modern_evening_street_1k.hdr";
 
   useEffect(() => {
     RectAreaLightUniformsLib.init();
@@ -141,14 +149,13 @@ export function SceneLighting({
 
   return (
     <>
-      {!mobileView ? (
-        <EnvironmentLighting
-          environmentFile={environmentFile}
-          plazaActive={plazaActive}
-          powerActive={powerActive}
-          rooftopActive={rooftopActive}
-        />
-      ) : null}
+      <EnvironmentLighting
+        environmentFile={environmentFile}
+        mobileView={mobileView}
+        plazaActive={plazaActive}
+        powerActive={powerActive}
+        rooftopActive={rooftopActive}
+      />
       <ambientLight intensity={mobileView ? (rooftopActive ? 0.76 : powerActive ? 0.9 : plazaActive ? 1.02 : 0.96) : rooftopActive ? 0.3 : powerActive ? 0.42 : plazaActive ? 0.52 : 0.48} />
       <hemisphereLight
         args={
@@ -163,7 +170,7 @@ export function SceneLighting({
       />
 
       <directionalLight
-        castShadow={!mobileView}
+        castShadow
         color="#ffd6ad"
         intensity={mobileView ? (rooftopActive ? 1.38 : 1.64) : rooftopActive ? 0.9 : 1.16}
         position={[8.4, 12, 16]}
@@ -253,6 +260,10 @@ export function SceneLighting({
   );
 }
 
-HDRI_PATHS.forEach((path) => {
+[
+  "/hdri/sunset_jhbcentral_1k.hdr",
+  "/hdri/modern_evening_street_1k.hdr",
+  "/hdri/rooftop_night_1k.hdr"
+].forEach((path) => {
   useLoader.preload(RGBELoader, path);
 });

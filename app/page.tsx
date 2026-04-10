@@ -591,11 +591,13 @@ export default function Page() {
           onSelect={setSelectedDrinksId}
           options={drinksOptions}
           panelCopy="The skyline saved the last word. Choose where the night settles, and let the city glow beneath you."
+          panelClassName="choice-panel-rooftop"
           selectedId={selectedDrinksId}
           selectedNote="This is how the skyline would end it"
           title="One more stop."
           tone="warm"
           unselectedNote="Take a breath. The best ending is probably already in front of you."
+          wrapClassName="panel-wrap-rooftop"
         />
       ) : null}
 

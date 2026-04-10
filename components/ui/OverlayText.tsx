@@ -47,20 +47,12 @@ export function OverlayText({
 
   if (phase === "arrivedDate") {
     return (
-      <>
-        <div className="overlay overlay-floating overlay-floating-date">
-          <div className="floating-chip floating-chip-date">
-            <span>First stop</span>
-            <strong>The board is waiting under the streetlights.</strong>
-          </div>
-        </div>
-
-        <div className="panel-wrap panel-wrap-first-stop">
-          <button className="primary-button first-stop-button" onClick={onDateOpen} type="button">
-            Tap here to choose the night
-          </button>
-        </div>
-      </>
+      <div className="overlay overlay-floating overlay-floating-date">
+        <button className="floating-chip floating-chip-date floating-chip-action" onClick={onDateOpen} type="button">
+          <span>First stop</span>
+          <strong>Tap to choose the night.</strong>
+        </button>
+      </div>
     );
   }
 

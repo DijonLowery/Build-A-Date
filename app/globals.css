@@ -1989,6 +1989,11 @@ button {
   padding: 0 1rem calc(env(safe-area-inset-bottom) + 1.1rem);
 }
 
+.panel-wrap-rooftop {
+  display: flex;
+  justify-content: flex-start;
+}
+
 .first-stop-button {
   width: min(100%, 21.5rem);
   margin-top: 0;
@@ -2294,9 +2299,9 @@ button {
 
 @media (max-width: 640px) {
   .choice-panel-compact {
-    width: min(100%, 21rem);
-    max-height: min(68svh, 31rem);
-    padding: 0.92rem 0.78rem 0.82rem;
+    width: min(100%, 19.4rem);
+    max-height: min(62svh, 28rem);
+    padding: 0.88rem 0.74rem 0.78rem;
     border-radius: 1.34rem;
     overflow: hidden;
   }
@@ -2318,9 +2323,9 @@ button {
   }
 
   .date-card-compact {
-    flex: 0 0 74%;
-    min-height: 8.1rem;
-    padding: 0.68rem 0.64rem;
+    flex: 0 0 72%;
+    min-height: 7.5rem;
+    padding: 0.62rem 0.6rem;
     border-radius: 0.92rem;
     scroll-snap-align: center;
   }
@@ -2345,18 +2350,30 @@ button {
   }
 
   .choice-panel-compact .panel-copy {
-    margin-top: 0.8rem;
-    font-size: 0.84rem;
-    line-height: 1.52;
+    margin-top: 0.72rem;
+    font-size: 0.8rem;
+    line-height: 1.46;
   }
 
   .choice-panel-compact .panel-footer {
-    gap: 0.72rem;
-    margin-top: 0.82rem;
+    gap: 0.64rem;
+    margin-top: 0.74rem;
   }
 
   .choice-panel-compact .selection-note {
-    padding: 0.82rem 0.88rem;
+    padding: 0.72rem 0.8rem;
+  }
+
+  .panel-wrap-rooftop {
+    padding-left: 0.62rem;
+    padding-right: 0.62rem;
+  }
+
+  .choice-panel-rooftop.choice-panel-compact {
+    width: min(100%, 17.3rem);
+    max-height: min(58svh, 26.5rem);
+    margin-left: 0;
+    margin-right: auto;
   }
 
   .world-prompt-date {

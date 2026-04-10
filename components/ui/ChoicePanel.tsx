@@ -21,6 +21,8 @@ type ChoicePanelProps = {
   title: string;
   tone?: "cool" | "warm";
   unselectedNote: string;
+  panelClassName?: string;
+  wrapClassName?: string;
 };
 
 export function ChoicePanel({
@@ -36,13 +38,15 @@ export function ChoicePanel({
   selectedNote,
   title,
   tone = "cool",
-  unselectedNote
+  unselectedNote,
+  panelClassName = "",
+  wrapClassName = ""
 }: ChoicePanelProps) {
   const selected = options.find((option) => option.id === selectedId) ?? null;
 
   return (
-    <div className="panel-wrap">
-      <div className={`choice-panel${tone === "warm" ? " choice-panel-warm" : ""}${compact ? " choice-panel-compact" : ""}`}>
+    <div className={`panel-wrap${wrapClassName ? ` ${wrapClassName}` : ""}`}>
+      <div className={`choice-panel${tone === "warm" ? " choice-panel-warm" : ""}${compact ? " choice-panel-compact" : ""}${panelClassName ? ` ${panelClassName}` : ""}`}>
         <div className="panel-header">
           <div>
             <p className="eyebrow">{eyebrow}</p>
