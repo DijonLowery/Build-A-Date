@@ -833,63 +833,26 @@ function DinnerPocket({ active, selectedDinnerId }: { active: boolean; selectedD
 }
 
 function BandStage({ active, selectedActivityId }: { active: boolean; selectedActivityId: string | null }) {
-  const speakerGlow = selectedActivityId === "music-vibes" ? 0.9 : 0.5;
+  const speakerGlow = selectedActivityId === "music-vibes" ? 1.1 : 0.6;
 
   return (
     <group position={[-0.8, 0, -85.6]}>
-      <RoundedBox args={[12.6, 7.4, 0.42]} castShadow position={[0, 3.7, -2.6]} radius={0.14} smoothness={6}>
-        <meshStandardMaterial color="#47363b" roughness={0.68} />
-      </RoundedBox>
-      <RoundedBox args={[12.2, 0.34, 4.3]} castShadow position={[0, 7.08, -0.72]} radius={0.08} smoothness={6}>
-        <meshStandardMaterial color="#37272b" roughness={0.62} />
-      </RoundedBox>
-      {[-6.06, 6.06].map((x) => (
-        <RoundedBox args={[0.34, 6.82, 4.14]} castShadow key={x} position={[x, 3.4, -0.78]} radius={0.08} smoothness={6}>
-          <meshStandardMaterial color="#37272b" roughness={0.64} />
-        </RoundedBox>
-      ))}
-      <mesh position={[0, 1.26, 0.66]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[6.2, 3.6]} />
-        <meshStandardMaterial color="#3b2527" roughness={0.82} />
-      </mesh>
-      <mesh position={[0, 3.15, -0.82]}>
-        <planeGeometry args={[5.8, 2.2]} />
-        <meshBasicMaterial color="#ffd7a8" opacity={0.16} transparent />
-      </mesh>
       <Suspense fallback={null}>
         <LiveBandModel
           active={active}
           path={JAZZ_BAND_MODEL}
-          position={[-0.4, 2.8, 0.8]}
+          position={[-0.6, 1.6, 0.4]}
           rotation={[0, Math.PI, 0]}
-          targetHeight={4.4}
+          targetHeight={5.2}
         />
       </Suspense>
 
-      {[-2.7, 2.7].map((x) => (
-        <group key={x} position={[x, 1.4, 0.48]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.76, 1.4, 0.7]} />
-            <meshStandardMaterial color="#111217" roughness={0.84} />
-          </mesh>
-          <pointLight color={x < 0 ? "#6fa5ff" : "#ffbf7d"} distance={4.8} intensity={speakerGlow} position={[0, 0.48, 0.42]} />
-        </group>
+      <pointLight color="#ffb97d" distance={14} intensity={active ? 2.4 : 0.9} position={[0, 4.8, 1.2]} />
+      <pointLight color="#7db4ff" distance={12} intensity={active ? 1.8 : 0.6} position={[-1.8, 4.2, 0.8]} />
+      <pointLight color="#ff98b3" distance={12} intensity={active ? 1.4 : 0.5} position={[1.8, 4, 0.8]} />
+      {[-2.6, 2.6].map((x) => (
+        <pointLight key={x} color={x < 0 ? "#6fa5ff" : "#ffbf7d"} distance={4.8} intensity={speakerGlow} position={[x, 0.8, 0.6]} />
       ))}
-
-      {[-1.6, 0, 1.6].map((x, index) => (
-        <mesh key={index} position={[x, 4.5, 1.06]}>
-          <planeGeometry args={[1.1, 0.22]} />
-          <meshBasicMaterial color={index === 1 ? "#ffddb0" : "#7db4ff"} opacity={0.22} transparent />
-        </mesh>
-      ))}
-
-      <mesh position={[0, 3.44, 1.02]}>
-        <planeGeometry args={[7.2, 0.38]} />
-        <meshBasicMaterial color="#ffddb0" opacity={0.24} transparent />
-      </mesh>
-      <pointLight color="#ffb97d" distance={12} intensity={active ? 2.1 : 0.92} position={[0, 5.4, 1.2]} />
-      <pointLight color="#7db4ff" distance={10} intensity={active ? 1.5 : 0.46} position={[-1.8, 4.4, 0.8]} />
-      <pointLight color="#ff98b3" distance={10} intensity={active ? 1.25 : 0.4} position={[1.8, 4.2, 0.8]} />
     </group>
   );
 }

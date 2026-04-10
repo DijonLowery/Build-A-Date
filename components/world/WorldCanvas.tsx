@@ -132,23 +132,23 @@ function getTargetProgress(phase: JourneyPhase) {
 
 function getPhaseSpeed(phase: JourneyPhase) {
   if (phase === "walkingDate") {
-    return 0.0142;
+    return 0.0165;
   }
 
   if (phase === "leavingDate") {
-    return 0.0126;
+    return 0.0145;
   }
 
   if (phase === "walkingDinner") {
-    return 0.0116;
+    return 0.0135;
   }
 
   if (phase === "walkingActivity") {
-    return 0.0108;
+    return 0.0126;
   }
 
   if (phase === "walkingDrinks") {
-    return 0.0098;
+    return 0.0112;
   }
 
   return 0.01;
@@ -322,14 +322,14 @@ function CameraDirector({
       if (activeStop === "date" && mobileView) {
         if (phase === "arrivedDate") {
           desiredPosition.set(
-            pairPosition.x - 3.6,
-            pairPosition.y + 2.8,
-            pairPosition.z + 5.8
+            pairPosition.x - 3.1,
+            pairPosition.y + 2.5,
+            pairPosition.z + 5.1
           );
           desiredLook.set(
-            pairPosition.x + 0.12,
-            pairPosition.y + 1.16,
-            pairPosition.z - 0.92
+            pairPosition.x + 0.22,
+            pairPosition.y + 1.1,
+            pairPosition.z - 0.6
           );
         } else {
           desiredPosition.set(
