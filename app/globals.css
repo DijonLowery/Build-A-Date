@@ -993,11 +993,11 @@ button {
 }
 
 .world-stage-emerging canvas {
-  animation: world-emerge 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: world-emerge 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .world-stage-emerging .mobile-world-journey {
-  animation: mobile-world-emerge 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: mobile-world-emerge 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .world-vignette,
@@ -2473,21 +2473,21 @@ button {
   background:
     radial-gradient(circle at 50% 72%, rgba(109, 220, 136, 0.14), transparent 16%),
     radial-gradient(circle at 46% 88%, rgba(255, 180, 104, 0.16), transparent 20%);
-  animation: veil-fade 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: veil-fade 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .transition-waterline {
   background:
     radial-gradient(circle at 50% 84%, rgba(255, 190, 127, 0.16), transparent 24%),
     linear-gradient(180deg, transparent 54%, rgba(168, 211, 238, 0.08) 72%, transparent 100%);
-  animation: veil-fade 1.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: veil-fade 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .transition-city-haze {
   background:
     radial-gradient(circle at 50% 46%, rgba(242, 170, 109, 0.08), transparent 20%),
     radial-gradient(circle at 50% 26%, rgba(117, 227, 139, 0.08), transparent 16%);
-  animation: veil-fade 1.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: veil-fade 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .petal-overlay {
@@ -2520,7 +2520,7 @@ button {
 }
 
 .petal-overlay-transition .petal {
-  animation: transition-petal-drift 1.8s ease-in forwards;
+  animation: transition-petal-drift 1.4s ease-in forwards;
   animation-delay: calc(var(--petal-delay) / 8);
 }
 

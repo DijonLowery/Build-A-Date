@@ -130,7 +130,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("introBrief");
-    }, 1400);
+    }, 900);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -144,7 +144,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "introBrief" ? "walkingDate" : current));
-    }, 3200);
+    }, 2600);
 
     return () => {
       window.clearTimeout(timeoutId);
