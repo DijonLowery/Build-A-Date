@@ -574,6 +574,7 @@ export default function Page() {
           onSelect={setSelectedActivityId}
           options={activityOptions}
           panelCopy="The city picked up a pulse, but it kept the room soft for the two of you. Choose how the night starts moving."
+          panelClassName="choice-panel-activity"
           selectedId={selectedActivityId}
           selectedNote="The night found its rhythm here"
           title="Then... we set the vibe."

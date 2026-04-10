@@ -2369,12 +2369,22 @@ button {
     padding-right: 0.62rem;
   }
 
-  .choice-panel-rooftop.choice-panel-compact {
-    width: min(100%, 17.3rem);
-    max-height: min(58svh, 26.5rem);
-    margin-left: 0;
-    margin-right: auto;
+.choice-panel-rooftop.choice-panel-compact {
+  width: min(100%, 17.3rem);
+  max-height: min(58svh, 26.5rem);
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.choice-panel-activity {
+  transform: translateY(14vh);
+}
+
+@media (max-width: 768px) {
+  .choice-panel-activity {
+    transform: translateY(18vh);
   }
+}
 
   .world-prompt-date {
     min-width: 9.8rem;

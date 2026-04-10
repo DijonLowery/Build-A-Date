@@ -63,7 +63,7 @@ const STOP_PROGRESS = {
 } as const;
 
 const STOP_FOCUS = {
-  activity: new THREE.Vector3(-0.4, 2.5, -89.2),
+  activity: new THREE.Vector3(-0.6, 4.1, -85.6),
   date: new THREE.Vector3(2.7, 1.55, -18.8),
   dinner: new THREE.Vector3(1.2, 1.75, -53.6),
   drinks: new THREE.Vector3(6.3, 5.7, -147.8)
@@ -342,8 +342,8 @@ function CameraDirector({
       } else if (activeStop === "activity") {
         desiredPosition.set(
           pairPosition.x + (mobileView ? 3.8 : 4.8),
-          pairPosition.y + (mobileView ? 4.9 : 5.8),
-          pairPosition.z + (mobileView ? 9.4 : 11.2)
+          pairPosition.y + (mobileView ? 6.2 : 6.8),
+          pairPosition.z + (mobileView ? 11.6 : 13.2)
         );
         desiredLook.copy(STOP_FOCUS.activity);
       } else if (activeStop === "drinks") {
