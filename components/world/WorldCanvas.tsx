@@ -132,23 +132,23 @@ function getTargetProgress(phase: JourneyPhase) {
 
 function getPhaseSpeed(phase: JourneyPhase) {
   if (phase === "walkingDate") {
-    return 0.0102;
+    return 0.0142;
   }
 
   if (phase === "leavingDate") {
-    return 0.0082;
+    return 0.0126;
   }
 
   if (phase === "walkingDinner") {
-    return 0.0076;
+    return 0.0116;
   }
 
   if (phase === "walkingActivity") {
-    return 0.0069;
+    return 0.0108;
   }
 
   if (phase === "walkingDrinks") {
-    return 0.0058;
+    return 0.0098;
   }
 
   return 0.01;
@@ -166,7 +166,7 @@ function AssetGate({ onReady }: { onReady?: () => void }) {
     firedRef.current = true;
     const id = window.setTimeout(() => {
       onReady();
-    }, 180);
+    }, 60);
 
     return () => {
       window.clearTimeout(id);
@@ -320,12 +320,25 @@ function CameraDirector({
       desiredLook.set(0.2, 1.4, 7.6);
     } else if (activeStop) {
       if (activeStop === "date" && mobileView) {
-        desiredPosition.set(
-          pairPosition.x - 2.7,
-          pairPosition.y + 3.3,
-          pairPosition.z + 7.2
-        );
-        desiredLook.set(STOP_FOCUS.date.x - 0.14, pairPosition.y + 1.22, STOP_FOCUS.date.z - 0.72);
+        if (phase === "arrivedDate") {
+          desiredPosition.set(
+            pairPosition.x - 3.6,
+            pairPosition.y + 2.8,
+            pairPosition.z + 5.8
+          );
+          desiredLook.set(
+            pairPosition.x + 0.12,
+            pairPosition.y + 1.16,
+            pairPosition.z - 0.92
+          );
+        } else {
+          desiredPosition.set(
+            pairPosition.x - 3.1,
+            pairPosition.y + 3.15,
+            pairPosition.z + 6.8
+          );
+          desiredLook.set(STOP_FOCUS.date.x - 0.24, pairPosition.y + 1.2, STOP_FOCUS.date.z - 0.54);
+        }
       } else if (activeStop === "activity") {
         desiredPosition.set(
           pairPosition.x + (mobileView ? 3.8 : 4.8),

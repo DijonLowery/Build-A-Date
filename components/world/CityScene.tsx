@@ -1,6 +1,6 @@
 "use client";
 
-import { RoundedBox, Stars, useGLTF, useTexture } from "@react-three/drei";
+import { RoundedBox, Stars, useAnimations, useGLTF, useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -19,6 +19,7 @@ type CitySceneProps = {
 const STREET_LAMP_MODEL = "/models/street-lamp.glb";
 const UNION_STATION_MODEL = "/models/union-station-kc.glb";
 const ORNATE_STREET_PROP_MODEL = "/models/ornate-street-prop.glb";
+const JAZZ_BAND_MODEL = "/models/jazz-band.glb";
 
 function prepareTexture(texture: THREE.Texture, repeatX: number, repeatY: number) {
   texture.wrapS = THREE.RepeatWrapping;
@@ -103,6 +104,118 @@ function StaticEnvironmentModel({
         scale={[scale, scale, scale]}
       >
         <primitive object={model} />
+      </group>
+    </group>
+  );
+}
+
+function LiveBandModel({
+  active,
+  path,
+  position,
+  rotation = [0, 0, 0],
+  targetHeight
+}: {
+  active: boolean;
+  path: string;
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  targetHeight: number;
+}) {
+  const motionRef = useRef<THREE.Group | null>(null);
+  const { scene, animations } = useGLTF(path);
+  const model = useMemo(() => clone(scene), [scene]);
+  const { actions } = useAnimations(animations, model);
+
+  const { anchor, scale } = useMemo(() => {
+    model.traverse((child) => {
+      if ("castShadow" in child) {
+        child.castShadow = true;
+      }
+
+      if ("receiveShadow" in child) {
+        child.receiveShadow = true;
+      }
+
+      if ("material" in child) {
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+
+        materials.forEach((material) => {
+          if (!(material instanceof THREE.Material)) {
+            return;
+          }
+
+          if ("envMapIntensity" in material) {
+            material.envMapIntensity = 1.35;
+          }
+
+          material.needsUpdate = true;
+        });
+      }
+    });
+
+    const box = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+
+    return {
+      anchor: new THREE.Vector3(center.x, box.min.y, center.z),
+      scale: targetHeight / Math.max(size.y, 0.001)
+    };
+  }, [model, targetHeight]);
+
+  useEffect(() => {
+    const clipActions = Object.values(actions).filter((action): action is NonNullable<typeof action> => Boolean(action));
+
+    clipActions.forEach((action) => {
+      action.reset();
+      action.fadeIn(0.34);
+      action.play();
+      action.timeScale = active ? 0.92 : 0.72;
+    });
+
+    return () => {
+      clipActions.forEach((action) => {
+        action.fadeOut(0.2);
+      });
+    };
+  }, [actions, active]);
+
+  useFrame(({ clock }, delta) => {
+    if (!motionRef.current) {
+      return;
+    }
+
+    const baseLift = position[1];
+    const baseTurn = 0;
+    const bobAmount = active ? 0.06 : 0.025;
+    const swayAmount = active ? 0.04 : 0.015;
+
+    motionRef.current.position.y = THREE.MathUtils.damp(
+      motionRef.current.position.y,
+      baseLift + Math.sin(clock.elapsedTime * 1.4) * bobAmount,
+      3.8,
+      delta
+    );
+    motionRef.current.rotation.y = THREE.MathUtils.damp(
+      motionRef.current.rotation.y,
+      baseTurn + Math.sin(clock.elapsedTime * 0.84) * swayAmount,
+      3.6,
+      delta
+    );
+  });
+
+  return (
+    <group position={position} rotation={rotation}>
+      <group ref={motionRef}>
+        <group
+          position={[-anchor.x * scale, -anchor.y * scale, -anchor.z * scale]}
+          scale={[scale, scale, scale]}
+        >
+          <primitive object={model} />
+        </group>
       </group>
     </group>
   );
@@ -632,36 +745,6 @@ function DinnerPocket({ active, selectedDinnerId }: { active: boolean; selectedD
   );
 }
 
-function BandMember({ accent, position, swayOffset = 0 }: { accent: string; position: [number, number, number]; swayOffset?: number }) {
-  const ref = useRef<THREE.Group | null>(null);
-
-  useFrame(({ clock }) => {
-    if (!ref.current) {
-      return;
-    }
-
-    ref.current.position.y = position[1] + Math.sin(clock.elapsedTime * 2.4 + swayOffset) * 0.06;
-    ref.current.rotation.y = Math.sin(clock.elapsedTime * 1.6 + swayOffset) * 0.1;
-  });
-
-  return (
-    <group position={position} ref={ref}>
-      <mesh castShadow position={[0, 0.9, 0]}>
-        <capsuleGeometry args={[0.16, 1.16, 8, 16]} />
-        <meshStandardMaterial color="#17161b" roughness={0.82} />
-      </mesh>
-      <mesh castShadow position={[0, 1.78, 0]}>
-        <sphereGeometry args={[0.24, 18, 18]} />
-        <meshStandardMaterial color="#8a5b43" roughness={0.72} />
-      </mesh>
-      <mesh position={[0, 1.2, 0.16]}>
-        <boxGeometry args={[0.18, 0.56, 0.12]} />
-        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.18} roughness={0.42} />
-      </mesh>
-    </group>
-  );
-}
-
 function BandStage({ active, selectedActivityId }: { active: boolean; selectedActivityId: string | null }) {
   const speakerGlow = selectedActivityId === "music-vibes" ? 0.9 : 0.5;
 
@@ -686,10 +769,15 @@ function BandStage({ active, selectedActivityId }: { active: boolean; selectedAc
         <planeGeometry args={[5.8, 2.2]} />
         <meshBasicMaterial color="#ffd7a8" opacity={0.16} transparent />
       </mesh>
-
-      <BandMember accent="#e0b56c" position={[-1.6, 1.2, 0.28]} swayOffset={0} />
-      <BandMember accent="#6fa5ff" position={[0, 1.18, 0.18]} swayOffset={1.4} />
-      <BandMember accent="#ff9ab0" position={[1.6, 1.22, 0.12]} swayOffset={2.1} />
+      <Suspense fallback={null}>
+        <LiveBandModel
+          active={active}
+          path={JAZZ_BAND_MODEL}
+          position={[0, 1.18, 0.52]}
+          rotation={[0, Math.PI, 0]}
+          targetHeight={4.9}
+        />
+      </Suspense>
 
       {[-2.7, 2.7].map((x) => (
         <group key={x} position={[x, 1.4, 0.48]}>
@@ -839,6 +927,7 @@ export function CityScene({
   selectedDinnerId,
   selectedDrinksId
 }: CitySceneProps) {
+  const bandQueuedRef = useRef(false);
   const dinnerActive =
     phase === "walkingDinner" ||
     phase === "arrivedDinner" ||
@@ -856,6 +945,21 @@ export function CityScene({
     phase === "lockedDrinks" ||
     phase === "finalReveal" ||
     phase === "submitted";
+
+  useEffect(() => {
+    if (bandQueuedRef.current || phase === "prologue" || phase === "transition") {
+      return;
+    }
+
+    bandQueuedRef.current = true;
+    const id = window.setTimeout(() => {
+      useGLTF.preload(JAZZ_BAND_MODEL);
+    }, 900);
+
+    return () => {
+      window.clearTimeout(id);
+    };
+  }, [phase]);
 
   const lampPositions = useMemo(
     () =>
