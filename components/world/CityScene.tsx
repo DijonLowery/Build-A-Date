@@ -1,6 +1,6 @@
 "use client";
 
-import { RoundedBox, Stars, useAnimations, useGLTF, useTexture } from "@react-three/drei";
+import { RoundedBox, Stars, useGLTF, useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -19,7 +19,6 @@ type CitySceneProps = {
 const STREET_LAMP_MODEL = "/models/street-lamp.glb";
 const UNION_STATION_MODEL = "/models/union-station-kc.glb";
 const ORNATE_STREET_PROP_MODEL = "/models/ornate-street-prop.glb";
-const JAZZ_BAND_MODEL = "/models/jazz-band.glb";
 
 function prepareTexture(texture: THREE.Texture, repeatX: number, repeatY: number) {
   texture.wrapS = THREE.RepeatWrapping;
@@ -127,129 +126,6 @@ function StaticEnvironmentModel({
         scale={[scale, scale, scale]}
       >
         <primitive object={model} />
-      </group>
-    </group>
-  );
-}
-
-function LiveBandModel({
-  active,
-  path,
-  position,
-  rotation = [0, 0, 0],
-  targetHeight
-}: {
-  active: boolean;
-  path: string;
-  position: [number, number, number];
-  rotation?: [number, number, number];
-  targetHeight: number;
-}) {
-  const motionRef = useRef<THREE.Group | null>(null);
-  const { scene, animations } = useGLTF(path);
-  const model = useMemo(() => clone(scene), [scene]);
-  const { actions } = useAnimations(animations, model);
-
-  const { anchor, scale } = useMemo(() => {
-    model.traverse((child) => {
-      if ("castShadow" in child) {
-        child.castShadow = true;
-      }
-
-      if ("receiveShadow" in child) {
-        child.receiveShadow = true;
-      }
-
-      if ("frustumCulled" in child) {
-        child.frustumCulled = false;
-      }
-
-      if ("material" in child) {
-        const materials = Array.isArray(child.material) ? child.material : [child.material];
-
-        materials.forEach((material) => {
-          if (!(material instanceof THREE.Material)) {
-            return;
-          }
-
-          const fallbackMaterial = new THREE.MeshStandardMaterial({
-            color: "#2a2326",
-            roughness: 0.68,
-            metalness: 0.12
-          });
-          if (child instanceof THREE.Mesh) {
-            child.material = fallbackMaterial;
-          }
-        });
-      }
-    });
-
-    const box = new THREE.Box3().setFromObject(model);
-    const size = new THREE.Vector3();
-    const center = new THREE.Vector3();
-    box.getSize(size);
-    box.getCenter(center);
-
-    const baseScale = targetHeight / Math.max(size.y, 0.001);
-    const clampedScale = THREE.MathUtils.clamp(baseScale, 0.02, 0.22);
-
-    return {
-      anchor: new THREE.Vector3(center.x, box.min.y, center.z),
-      scale: clampedScale
-    };
-  }, [model, targetHeight]);
-
-  useEffect(() => {
-    const clipActions = Object.values(actions).filter((action): action is NonNullable<typeof action> => Boolean(action));
-
-    clipActions.forEach((action) => {
-      action.reset();
-      action.fadeIn(0.34);
-      action.play();
-      action.timeScale = active ? 0.92 : 0.72;
-    });
-
-    return () => {
-      clipActions.forEach((action) => {
-        action.fadeOut(0.2);
-      });
-    };
-  }, [actions, active]);
-
-  useFrame(({ clock }, delta) => {
-    if (!motionRef.current) {
-      return;
-    }
-
-    const baseLift = position[1];
-    const baseTurn = 0;
-    const bobAmount = active ? 0.06 : 0.025;
-    const swayAmount = active ? 0.04 : 0.015;
-
-    motionRef.current.position.y = THREE.MathUtils.damp(
-      motionRef.current.position.y,
-      baseLift + Math.sin(clock.elapsedTime * 1.4) * bobAmount,
-      3.8,
-      delta
-    );
-    motionRef.current.rotation.y = THREE.MathUtils.damp(
-      motionRef.current.rotation.y,
-      baseTurn + Math.sin(clock.elapsedTime * 0.84) * swayAmount,
-      3.6,
-      delta
-    );
-
-  });
-
-  return (
-    <group position={position} rotation={rotation}>
-      <group ref={motionRef}>
-        <group
-          position={[-anchor.x * scale, -anchor.y * scale, -anchor.z * scale]}
-          scale={[scale, scale, scale]}
-        >
-          <primitive object={model} />
-        </group>
       </group>
     </group>
   );
@@ -780,25 +656,151 @@ function DinnerPocket({ active, selectedDinnerId }: { active: boolean; selectedD
 }
 
 function BandStage({ active, selectedActivityId }: { active: boolean; selectedActivityId: string | null }) {
-  const speakerGlow = selectedActivityId === "music-vibes" ? 1.1 : 0.6;
+  const glow = selectedActivityId === "music-vibes" ? 1.2 : 0.7;
+  const bandRef = useRef<THREE.Group | null>(null);
+
+  useFrame(({ clock }, delta) => {
+    if (!bandRef.current) {
+      return;
+    }
+
+    const pulse = Math.sin(clock.elapsedTime * 1.6);
+    const sway = Math.sin(clock.elapsedTime * 0.9);
+    const lift = active ? 0.04 : 0.02;
+
+    bandRef.current.position.y = THREE.MathUtils.damp(bandRef.current.position.y, 0.02 + pulse * lift, 4, delta);
+    bandRef.current.rotation.y = THREE.MathUtils.damp(bandRef.current.rotation.y, sway * 0.06, 4, delta);
+  });
 
   return (
-    <group position={[-0.8, 0, -85.6]}>
-      <Suspense fallback={null}>
-        <LiveBandModel
-          active={active}
-          path={JAZZ_BAND_MODEL}
-          position={[0.1, 1.4, 0.8]}
-          rotation={[0, Math.PI, 0]}
-          targetHeight={4.6}
-        />
-      </Suspense>
+    <group position={[-0.6, 0, -84.8]}>
+      <RoundedBox args={[9.6, 0.48, 5.2]} castShadow position={[0, 0.38, 0]} radius={0.16} smoothness={4}>
+        <meshStandardMaterial color="#2a2125" roughness={0.72} />
+      </RoundedBox>
+      <RoundedBox args={[8.8, 0.16, 4.6]} position={[0, 0.7, 0]} radius={0.14} smoothness={4}>
+        <meshStandardMaterial color="#3b2a2f" roughness={0.68} />
+      </RoundedBox>
+      <RoundedBox args={[10.4, 3.6, 0.6]} position={[0, 2.4, -2.5]} radius={0.2} smoothness={6}>
+        <meshStandardMaterial color="#2f2128" roughness={0.9} />
+      </RoundedBox>
+      <RoundedBox args={[6.2, 0.26, 0.2]} position={[0, 3.4, -2.15]} radius={0.08} smoothness={4}>
+        <meshStandardMaterial color="#3a2a2f" roughness={0.72} />
+      </RoundedBox>
+      <mesh position={[0, 3.38, -2.05]}>
+        <planeGeometry args={[5.2, 0.6]} />
+        <meshBasicMaterial color="#f7e5cf" opacity={0.2} transparent />
+      </mesh>
 
-      <pointLight color="#ffb97d" distance={14} intensity={active ? 2.6 : 1.1} position={[0, 4.2, 1.2]} />
-      <pointLight color="#7db4ff" distance={12} intensity={active ? 1.8 : 0.6} position={[-1.8, 4.2, 0.8]} />
-      <pointLight color="#ff98b3" distance={12} intensity={active ? 1.4 : 0.5} position={[1.8, 4, 0.8]} />
+      <group ref={bandRef} position={[0, 0.6, 0.2]}>
+        <group position={[-2.2, 0, 0.2]}>
+          <mesh castShadow position={[0, 0.3, 0]}>
+            <cylinderGeometry args={[0.5, 0.6, 0.46, 20]} />
+            <meshStandardMaterial color="#241c22" roughness={0.6} />
+          </mesh>
+          <mesh castShadow position={[0, 0.7, 0]}>
+            <cylinderGeometry args={[0.28, 0.32, 0.3, 20]} />
+            <meshStandardMaterial color="#2f262c" roughness={0.6} />
+          </mesh>
+          <mesh castShadow position={[0.7, 0.9, -0.1]}>
+            <torusGeometry args={[0.26, 0.04, 10, 18]} />
+            <meshStandardMaterial color="#d4b07a" roughness={0.35} />
+          </mesh>
+          <mesh castShadow position={[0, 1.1, 0]}>
+            <capsuleGeometry args={[0.16, 0.6, 6, 12]} />
+            <meshStandardMaterial color="#151218" roughness={0.7} />
+          </mesh>
+          <mesh castShadow position={[0, 1.6, 0]}>
+            <sphereGeometry args={[0.22, 16, 16]} />
+            <meshStandardMaterial color="#8b5d45" roughness={0.7} />
+          </mesh>
+        </group>
+
+        <group position={[-0.4, 0, 0.6]}>
+          <mesh castShadow position={[0, 0.9, 0]}>
+            <capsuleGeometry args={[0.16, 0.85, 6, 12]} />
+            <meshStandardMaterial color="#17151c" roughness={0.7} />
+          </mesh>
+          <mesh castShadow position={[0, 1.6, 0]}>
+            <sphereGeometry args={[0.22, 16, 16]} />
+            <meshStandardMaterial color="#8b5d45" roughness={0.7} />
+          </mesh>
+          <mesh castShadow position={[0.25, 1.05, 0.1]}>
+            <cylinderGeometry args={[0.03, 0.03, 1.1, 12]} />
+            <meshStandardMaterial color="#c6b095" roughness={0.3} />
+          </mesh>
+          <mesh castShadow position={[0.25, 1.6, 0.1]}>
+            <sphereGeometry args={[0.06, 10, 10]} />
+            <meshStandardMaterial color="#c6b095" roughness={0.3} />
+          </mesh>
+        </group>
+
+        <group position={[1.2, 0, 0.2]}>
+          <mesh castShadow position={[0, 0.9, 0]}>
+            <capsuleGeometry args={[0.16, 0.85, 6, 12]} />
+            <meshStandardMaterial color="#17151c" roughness={0.7} />
+          </mesh>
+          <mesh castShadow position={[0, 1.6, 0]}>
+            <sphereGeometry args={[0.22, 16, 16]} />
+            <meshStandardMaterial color="#8b5d45" roughness={0.7} />
+          </mesh>
+          <mesh castShadow position={[0.2, 0.7, 0.2]}>
+            <sphereGeometry args={[0.22, 14, 14]} />
+            <meshStandardMaterial color="#d6a874" roughness={0.4} />
+          </mesh>
+          <mesh castShadow position={[0.46, 0.9, 0.2]}>
+            <boxGeometry args={[0.62, 0.08, 0.08]} />
+            <meshStandardMaterial color="#d6a874" roughness={0.4} />
+          </mesh>
+        </group>
+
+        <group position={[2.9, 0, -0.2]}>
+          <mesh castShadow position={[0, 0.7, 0]}>
+            <boxGeometry args={[1.3, 0.22, 0.6]} />
+            <meshStandardMaterial color="#2b2427" roughness={0.6} />
+          </mesh>
+          <mesh castShadow position={[0, 0.88, 0]}>
+            <boxGeometry args={[1.2, 0.08, 0.4]} />
+            <meshStandardMaterial color="#f2e9db" roughness={0.4} />
+          </mesh>
+          <mesh castShadow position={[0, 1.35, -0.25]}>
+            <capsuleGeometry args={[0.14, 0.6, 6, 12]} />
+            <meshStandardMaterial color="#151218" roughness={0.7} />
+          </mesh>
+          <mesh castShadow position={[0, 1.86, -0.25]}>
+            <sphereGeometry args={[0.2, 16, 16]} />
+            <meshStandardMaterial color="#8b5d45" roughness={0.7} />
+          </mesh>
+        </group>
+      </group>
+
+      <spotLight
+        angle={0.55}
+        castShadow
+        color="#ffcca6"
+        distance={18}
+        intensity={active ? 2.2 : 1.4}
+        penumbra={0.6}
+        position={[0, 6, 2.4]}
+      />
+      <spotLight
+        angle={0.6}
+        castShadow={false}
+        color="#7db4ff"
+        distance={16}
+        intensity={active ? 1.6 : 0.8}
+        penumbra={0.7}
+        position={[-3, 5.8, 1.6]}
+      />
+      <pointLight color="#ffb97d" distance={14} intensity={active ? 1.8 : 0.9} position={[0, 4.2, 1.2]} />
+      <pointLight color="#ff98b3" distance={12} intensity={active ? 1.1 : 0.5} position={[2.2, 3.8, 0.8]} />
       {[-2.6, 2.6].map((x) => (
-        <pointLight key={x} color={x < 0 ? "#6fa5ff" : "#ffbf7d"} distance={4.8} intensity={speakerGlow} position={[x, 0.8, 0.6]} />
+        <pointLight
+          key={x}
+          color={x < 0 ? "#6fa5ff" : "#ffbf7d"}
+          distance={4.8}
+          intensity={glow}
+          position={[x, 0.8, 0.6]}
+        />
       ))}
     </group>
   );
@@ -907,12 +909,22 @@ function SkylineCluster({ mobileView = false }: { mobileView?: boolean }) {
   );
 }
 
-function AtmosphereBackdrop({ phase }: { phase: JourneyPhase }) {
+function AtmosphereBackdrop({ phase, mobileView }: { phase: JourneyPhase; mobileView: boolean }) {
   const twilightStars = phase === "finalReveal" || phase === "submitted";
 
   return (
     <group>
-      {twilightStars ? <Stars count={90} depth={24} factor={1.1} fade radius={110} saturation={0} speed={0.08} /> : null}
+      {twilightStars ? (
+        <Stars
+          count={mobileView ? 40 : 90}
+          depth={mobileView ? 18 : 24}
+          factor={mobileView ? 0.8 : 1.1}
+          fade
+          radius={mobileView ? 80 : 110}
+          saturation={0}
+          speed={mobileView ? 0.04 : 0.08}
+        />
+      ) : null}
     </group>
   );
 }
@@ -965,7 +977,7 @@ export function CityScene({
 
   return (
     <group>
-      <AtmosphereBackdrop phase={phase} />
+      <AtmosphereBackdrop phase={phase} mobileView={mobileView} />
       <Suspense
         fallback={
           <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, -58]}>

@@ -110,7 +110,7 @@ export default function Page() {
   );
 
   useEffect(() => {
-    if (!startRequested || !worldPrepared || phase !== "prologue") {
+    if (!startRequested || phase !== "prologue") {
       return;
     }
 
@@ -121,7 +121,7 @@ export default function Page() {
         setStartRequested(false);
       });
     });
-  }, [phase, startRequested, worldPrepared]);
+  }, [phase, startRequested]);
 
   useEffect(() => {
     if (phase !== "transition") {
@@ -130,21 +130,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("introBrief");
-    }, 900);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [phase]);
-
-  useEffect(() => {
-    if (phase !== "introBrief") {
-      return undefined;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setPhase((current) => (current === "introBrief" ? "walkingDate" : current));
-    }, 2600);
+    }, 1200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -179,7 +165,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("leavingDate");
-    }, 1400);
+    }, 1700);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -193,7 +179,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingDinner");
-    }, 1800);
+    }, 2200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -207,7 +193,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedDinner" ? "selectingDinner" : current));
-    }, 1600);
+    }, 2000);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -221,7 +207,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingActivity");
-    }, 1800);
+    }, 2200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -235,7 +221,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedActivity" ? "selectingActivity" : current));
-    }, 1600);
+    }, 2000);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -249,7 +235,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingDrinks");
-    }, 1800);
+    }, 2300);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -263,7 +249,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedDrinks" ? "selectingDrinks" : current));
-    }, 1600);
+    }, 2000);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -277,7 +263,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("finalReveal");
-    }, 1800);
+    }, 2200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -285,10 +271,14 @@ export default function Page() {
   }, [phase]);
 
   function handleStart() {
+    if (phase !== "prologue" || startRequested) {
+      return;
+    }
+
     requestAmbientAudioStart();
     setStartRequested(true);
 
-    if (worldPrepared && phase === "prologue") {
+    if (phase === "prologue") {
       window.requestAnimationFrame(() => {
         startTransition(() => {
           setSubmitted(false);
@@ -508,7 +498,9 @@ export default function Page() {
         </div>
       ) : null}
 
-      {phase === "introBrief" ? <WorldInstructions onContinue={handleIntroContinue} /> : null}
+      {phase === "introBrief" ? (
+        <WorldInstructions onContinue={handleIntroContinue} ready={worldPrepared} />
+      ) : null}
 
       {phase !== "prologue" &&
       phase !== "transition" &&

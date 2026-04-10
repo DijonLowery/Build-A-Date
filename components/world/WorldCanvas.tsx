@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Preload, useProgress } from "@react-three/drei";
 import {
   Bloom,
   BrightnessContrast,
@@ -132,46 +131,45 @@ function getTargetProgress(phase: JourneyPhase) {
 
 function getPhaseSpeed(phase: JourneyPhase) {
   if (phase === "walkingDate") {
-    return 0.0178;
+    return 0.0156;
   }
 
   if (phase === "leavingDate") {
-    return 0.017;
+    return 0.015;
   }
 
   if (phase === "walkingDinner") {
-    return 0.0162;
+    return 0.0142;
   }
 
   if (phase === "walkingActivity") {
-    return 0.0148;
+    return 0.0134;
   }
 
   if (phase === "walkingDrinks") {
-    return 0.0132;
+    return 0.0122;
   }
 
   return 0.01;
 }
 
 function AssetGate({ onReady }: { onReady?: () => void }) {
-  const { active, progress } = useProgress();
   const firedRef = useRef(false);
 
   useEffect(() => {
-    if (!onReady || active || progress < 100 || firedRef.current) {
+    if (!onReady || firedRef.current) {
       return;
     }
 
     firedRef.current = true;
     const id = window.setTimeout(() => {
       onReady();
-    }, 60);
+    }, 200);
 
     return () => {
       window.clearTimeout(id);
     };
-  }, [active, onReady, progress]);
+  }, [onReady]);
 
   return null;
 }
@@ -235,9 +233,10 @@ function JourneyRig({
     const targetProgress = getTargetProgress(phase);
 
     if (isWalkingPhase(phase)) {
-      progressRef.current = Math.min(targetProgress, progressRef.current + delta * getPhaseSpeed(phase));
+      const stepped = progressRef.current + delta * getPhaseSpeed(phase);
+      progressRef.current = THREE.MathUtils.damp(Math.min(stepped, targetProgress), targetProgress, 5.2, delta);
     } else {
-      progressRef.current = THREE.MathUtils.damp(progressRef.current, targetProgress, 3.2, delta);
+      progressRef.current = THREE.MathUtils.damp(progressRef.current, targetProgress, 3.6, delta);
     }
 
     const point = curve.getPoint(progressRef.current);
@@ -298,6 +297,8 @@ function CameraDirector({
   const settledLook = useMemo(() => new THREE.Vector3(0, 1.5, 0), []);
   const up = useMemo(() => new THREE.Vector3(0, 1, 0), []);
   const sideVector = useMemo(() => new THREE.Vector3(), []);
+  const stopPosition = useMemo(() => new THREE.Vector3(), []);
+  const stopLook = useMemo(() => new THREE.Vector3(), []);
 
   useFrame((state, delta) => {
     const pair = pairRigRef.current;
@@ -307,6 +308,16 @@ function CameraDirector({
     }
 
     const activeStop = vectorForPhase(phase);
+    const approachingStop =
+      phase === "walkingDate"
+        ? "date"
+        : phase === "walkingDinner"
+          ? "dinner"
+          : phase === "walkingActivity"
+            ? "activity"
+            : phase === "walkingDrinks"
+              ? "drinks"
+              : null;
     const pairPosition = pair.position;
     const progress = progressRef.current;
     const tangent = curve.getTangent(Math.min(progress + 0.008, 1)).normalize();
@@ -396,18 +407,43 @@ function CameraDirector({
         );
         desiredLook.set(pairPosition.x + 0.35, pairPosition.y + 1.08, pairPosition.z - 6.8);
       }
+
+      if (approachingStop) {
+        const stopProgress = STOP_PROGRESS[approachingStop];
+        const distance = Math.abs(stopProgress - progress);
+        const blend = THREE.MathUtils.clamp(1 - distance / 0.07, 0, 1);
+
+        if (approachingStop === "date" && mobileView) {
+          stopPosition.set(
+            pairPosition.x + 0.4,
+            pairPosition.y + 2.2,
+            pairPosition.z - 4.2
+          );
+          stopLook.set(
+            pairPosition.x + 0.02,
+            pairPosition.y + 1.18,
+            pairPosition.z + 0.2
+          );
+        } else {
+          stopPosition.copy(STOP_CAMERA[approachingStop]);
+          stopLook.copy(STOP_FOCUS[approachingStop]);
+        }
+
+        desiredPosition.lerp(stopPosition, blend);
+        desiredLook.lerp(stopLook, blend);
+      }
     }
 
     desiredPosition.x += sway;
     desiredPosition.y += lift;
 
-    perspectiveCamera.position.x = THREE.MathUtils.damp(perspectiveCamera.position.x, desiredPosition.x, 3.6, delta);
-    perspectiveCamera.position.y = THREE.MathUtils.damp(perspectiveCamera.position.y, desiredPosition.y, 3.6, delta);
-    perspectiveCamera.position.z = THREE.MathUtils.damp(perspectiveCamera.position.z, desiredPosition.z, 3.6, delta);
+    perspectiveCamera.position.x = THREE.MathUtils.damp(perspectiveCamera.position.x, desiredPosition.x, 3.1, delta);
+    perspectiveCamera.position.y = THREE.MathUtils.damp(perspectiveCamera.position.y, desiredPosition.y, 3.1, delta);
+    perspectiveCamera.position.z = THREE.MathUtils.damp(perspectiveCamera.position.z, desiredPosition.z, 3.1, delta);
 
-    settledLook.x = THREE.MathUtils.damp(settledLook.x, desiredLook.x, 4.2, delta);
-    settledLook.y = THREE.MathUtils.damp(settledLook.y, desiredLook.y, 4.2, delta);
-    settledLook.z = THREE.MathUtils.damp(settledLook.z, desiredLook.z, 4.2, delta);
+    settledLook.x = THREE.MathUtils.damp(settledLook.x, desiredLook.x, 3.6, delta);
+    settledLook.y = THREE.MathUtils.damp(settledLook.y, desiredLook.y, 3.6, delta);
+    settledLook.z = THREE.MathUtils.damp(settledLook.z, desiredLook.z, 3.6, delta);
 
     perspectiveCamera.lookAt(settledLook);
 
@@ -447,34 +483,38 @@ function WorldPostEffects({ mobileView }: { mobileView: boolean }) {
 
   return (
     <EffectComposer multisampling={0}>
-      <N8AO
-        aoRadius={mobileView ? 1.6 : 2.4}
-        aoSamples={mobileView ? 8 : 16}
-        color="#120d12"
-        denoiseRadius={mobileView ? 6 : 10}
-        denoiseSamples={mobileView ? 3 : 4}
-        distanceFalloff={1}
-        halfRes={mobileView}
-        intensity={mobileView ? 0.95 : 1.3}
-        quality={mobileView ? "performance" : "medium"}
-        screenSpaceRadius
-      />
+      {!mobileView ? (
+        <N8AO
+          aoRadius={2.4}
+          aoSamples={16}
+          color="#120d12"
+          denoiseRadius={10}
+          denoiseSamples={4}
+          distanceFalloff={1}
+          halfRes={false}
+          intensity={1.3}
+          quality="medium"
+          screenSpaceRadius
+        />
+      ) : null}
       <Bloom
-        intensity={mobileView ? 0.24 : 0.4}
+        intensity={mobileView ? 0.18 : 0.4}
         luminanceSmoothing={0.9}
         luminanceThreshold={0.8}
         mipmapBlur
       />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-      <HueSaturation saturation={mobileView ? 0.04 : 0.08} />
-      <BrightnessContrast brightness={0.01} contrast={mobileView ? 0.05 : 0.08} />
-      <ChromaticAberration
-        blendFunction={BlendFunction.NORMAL}
-        offset={aberrationOffset}
-        radialModulation
-        modulationOffset={0.52}
-      />
-      <Vignette darkness={mobileView ? 0.24 : 0.3} eskil={false} offset={0.5} />
+      <HueSaturation saturation={mobileView ? 0.02 : 0.08} />
+      <BrightnessContrast brightness={0.01} contrast={mobileView ? 0.04 : 0.08} />
+      {!mobileView ? (
+        <ChromaticAberration
+          blendFunction={BlendFunction.NORMAL}
+          offset={aberrationOffset}
+          radialModulation
+          modulationOffset={0.52}
+        />
+      ) : null}
+      <Vignette darkness={mobileView ? 0.2 : 0.3} eskil={false} offset={0.5} />
     </EffectComposer>
   );
 }
@@ -538,7 +578,7 @@ export function WorldCanvas({
     <div className={`world-stage${transitioning ? " world-stage-emerging" : ""}`}>
       <Canvas
         camera={{ fov: mobileView ? 47 : 43, near: 0.1, far: 320, position: [-2.3, 4.1, 24.6] }}
-        dpr={mobileView ? [0.85, 1.05] : [1, 1.35]}
+        dpr={mobileView ? [0.65, 0.9] : [1, 1.35]}
         gl={{
           alpha: false,
           antialias: !mobileView,
@@ -554,7 +594,7 @@ export function WorldCanvas({
           gl.toneMappingExposure = mobileView ? 0.82 : 0.88;
           gl.setClearColor("#8b6570");
         }}
-        performance={{ min: 0.65 }}
+        performance={{ min: 0.5 }}
         shadows
       >
         <AssetGate onReady={onWorldReady} />
@@ -569,8 +609,8 @@ export function WorldCanvas({
           intensity={0.96}
           position={[8, 14, 12]}
           shadow-bias={-0.00008}
-          shadow-mapSize-height={mobileView ? 512 : 1024}
-          shadow-mapSize-width={mobileView ? 512 : 1024}
+          shadow-mapSize-height={mobileView ? 256 : 1024}
+          shadow-mapSize-width={mobileView ? 256 : 1024}
         />
 
         <JourneyRig
@@ -587,13 +627,15 @@ export function WorldCanvas({
           phase={phase}
           progressRef={journeyProgressRef}
         />
-        <CityScene
-          mobileView={mobileView}
-          phase={phase}
-          selectedActivityId={selectedActivityId}
-          selectedDinnerId={selectedDinnerId}
-          selectedDrinksId={selectedDrinksId}
-        />
+        <Suspense fallback={null}>
+          <CityScene
+            mobileView={mobileView}
+            phase={phase}
+            selectedActivityId={selectedActivityId}
+            selectedDinnerId={selectedDinnerId}
+            selectedDrinksId={selectedDrinksId}
+          />
+        </Suspense>
 
         <group position={[0, 0, 18]} ref={pairRigRef} scale={mobileView ? 1.08 : 1.12}>
           <pointLight color="#ffd8af" distance={10} intensity={mobileView ? 0.68 : 0.82} position={[0, 3, 2.2]} />
@@ -616,7 +658,6 @@ export function WorldCanvas({
             powerActive={activityActive}
             rooftopActive={drinksActive}
           />
-          <Preload all />
         </Suspense>
 
         <WorldPostEffects mobileView={mobileView} />

@@ -2,6 +2,7 @@
 
 type WorldInstructionsProps = {
   onContinue: () => void;
+  ready?: boolean;
 };
 
 const instructionRows = [
@@ -10,7 +11,7 @@ const instructionRows = [
   "You do not have to steer anything hard. Just choose what feels right and let the city carry the rest."
 ] as const;
 
-export function WorldInstructions({ onContinue }: WorldInstructionsProps) {
+export function WorldInstructions({ onContinue, ready = true }: WorldInstructionsProps) {
   return (
     <div className="panel-wrap panel-wrap-intro">
       <div className="choice-panel world-instructions-panel">
@@ -35,7 +36,12 @@ export function WorldInstructions({ onContinue }: WorldInstructionsProps) {
           ))}
         </div>
 
-        <button className="primary-button world-instructions-button" onClick={onContinue} type="button">
+        {!ready ? <p className="world-instructions-loading">Loading the city, just a breath.</p> : null}
+        <button
+          className="primary-button world-instructions-button"
+          onClick={onContinue}
+          type="button"
+        >
           Take my hand
         </button>
       </div>

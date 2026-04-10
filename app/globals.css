@@ -838,6 +838,7 @@ button {
   min-height: 3.4rem;
   margin-top: 0.5rem;
   padding: 0.95rem 1.6rem;
+  cursor: pointer;
   border: 1px solid rgba(255, 224, 194, 0.22);
   border-radius: 999px;
   background:
@@ -2091,6 +2092,14 @@ button {
   font-size: 0.92rem;
   line-height: 1.62;
   color: rgba(255, 244, 232, 0.82);
+}
+
+.world-instructions-loading {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 226, 196, 0.7);
 }
 
 .world-instructions-button {
