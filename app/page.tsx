@@ -130,7 +130,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("introBrief");
-    }, 2100);
+    }, 1400);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -144,7 +144,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "introBrief" ? "walkingDate" : current));
-    }, 2800);
+    }, 1600);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -165,7 +165,7 @@ export default function Page() {
     const timeoutId = window.setTimeout(() => {
       datePromptOpenedRef.current = true;
       setPhase((current) => (current === "arrivedDate" ? "selectingDate" : current));
-    }, 2600);
+    }, 1600);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -179,7 +179,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("leavingDate");
-    }, 2200);
+    }, 1400);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -193,7 +193,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingDinner");
-    }, 2800);
+    }, 1800);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -207,7 +207,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedDinner" ? "selectingDinner" : current));
-    }, 2400);
+    }, 1600);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -221,7 +221,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingActivity");
-    }, 2600);
+    }, 1800);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -235,7 +235,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedActivity" ? "selectingActivity" : current));
-    }, 2400);
+    }, 1600);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -249,7 +249,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("walkingDrinks");
-    }, 2800);
+    }, 1800);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -263,7 +263,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "arrivedDrinks" ? "selectingDrinks" : current));
-    }, 2600);
+    }, 1600);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -277,7 +277,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase("finalReveal");
-    }, 2400);
+    }, 1800);
 
     return () => {
       window.clearTimeout(timeoutId);

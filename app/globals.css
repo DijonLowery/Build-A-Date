@@ -2377,13 +2377,24 @@ button {
 }
 
 .choice-panel-activity {
-  transform: translateY(14vh);
+  transform: translateY(-10vh);
+  max-height: 62svh;
 }
 
 @media (max-width: 768px) {
   .choice-panel-activity {
-    transform: translateY(18vh);
+    transform: translateY(-12vh);
+    max-height: 64svh;
   }
+}
+
+.choice-panel-activity .panel-copy {
+  font-size: 0.78rem;
+  line-height: 1.38;
+}
+
+.choice-panel-activity .date-card-compact {
+  min-height: 6.6rem;
 }
 
   .world-prompt-date {
