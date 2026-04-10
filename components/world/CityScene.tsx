@@ -1,13 +1,10 @@
 "use client";
 
 import { RoundedBox, Stars, useAnimations, useGLTF, useTexture } from "@react-three/drei";
-import { useFrame, useLoader, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader.js";
-import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 
 import type { JourneyPhase } from "@/components/world/RouteController";
 
@@ -149,16 +146,9 @@ function LiveBandModel({
   targetHeight: number;
 }) {
   const motionRef = useRef<THREE.Group | null>(null);
-  const { gl } = useThree();
-  const gltf = useLoader(GLTFLoader, path, (loader) => {
-    const ktx2Loader = new KTX2Loader();
-    ktx2Loader.setTranscoderPath("/basis/");
-    ktx2Loader.detectSupport(gl);
-    loader.setKTX2Loader(ktx2Loader);
-    loader.setMeshoptDecoder(MeshoptDecoder);
-  });
-  const model = useMemo(() => clone(gltf.scene), [gltf.scene]);
-  const { actions } = useAnimations(gltf.animations, model);
+  const { scene, animations } = useGLTF(path);
+  const model = useMemo(() => clone(scene), [scene]);
+  const { actions } = useAnimations(animations, model);
 
   const { anchor, scale } = useMemo(() => {
     model.traverse((child) => {
@@ -168,6 +158,10 @@ function LiveBandModel({
 
       if ("receiveShadow" in child) {
         child.receiveShadow = true;
+      }
+
+      if ("frustumCulled" in child) {
+        child.frustumCulled = false;
       }
 
       if ("material" in child) {
@@ -190,40 +184,20 @@ function LiveBandModel({
       }
     });
 
-    const box = new THREE.Box3();
-    let hasMesh = false;
-    model.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        hasMesh = true;
-        box.expandByObject(child);
-      }
-    });
-    if (!hasMesh) {
-      box.setFromObject(model);
-    }
+    const box = new THREE.Box3().setFromObject(model);
     const size = new THREE.Vector3();
     const center = new THREE.Vector3();
     box.getSize(size);
     box.getCenter(center);
 
     const baseScale = targetHeight / Math.max(size.y, 0.001);
-    const boostedScale = THREE.MathUtils.clamp(baseScale * 1.2, 0.02, 0.3);
+    const clampedScale = THREE.MathUtils.clamp(baseScale, 0.02, 0.22);
 
     return {
       anchor: new THREE.Vector3(center.x, box.min.y, center.z),
-      scale: boostedScale
+      scale: clampedScale
     };
   }, [model, targetHeight]);
-
-  const useFallbackBand = useMemo(() => {
-    let count = 0;
-    model.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        count += 1;
-      }
-    });
-    return count < 4;
-  }, [model]);
 
   useEffect(() => {
     const clipActions = Object.values(actions).filter((action): action is NonNullable<typeof action> => Boolean(action));
@@ -270,33 +244,6 @@ function LiveBandModel({
   return (
     <group position={position} rotation={rotation}>
       <group ref={motionRef}>
-        {useFallbackBand ? (
-          <group position={[0, 1.4, 0.6]}>
-            {[-1.1, 0, 1.1].map((x, index) => (
-              <group key={x} position={[x, 0, 0]}>
-                <mesh castShadow position={[0, 0.6, 0]}>
-                  <capsuleGeometry args={[0.18, 0.9, 8, 16]} />
-                  <meshStandardMaterial color="#1c1a22" roughness={0.68} />
-                </mesh>
-                <mesh castShadow position={[0, 1.3, 0]}>
-                  <sphereGeometry args={[0.26, 18, 18]} />
-                  <meshStandardMaterial color="#8a5b43" roughness={0.7} />
-                </mesh>
-                {index === 1 ? (
-                  <mesh castShadow position={[0, 0.2, 0.2]}>
-                    <cylinderGeometry args={[0.28, 0.3, 0.2, 16]} />
-                    <meshStandardMaterial color="#2a1f22" roughness={0.66} />
-                  </mesh>
-                ) : (
-                  <mesh castShadow position={[0, 0.2, 0.2]}>
-                    <boxGeometry args={[0.16, 0.54, 0.08]} />
-                    <meshStandardMaterial color="#e0b56c" roughness={0.36} />
-                  </mesh>
-                )}
-              </group>
-            ))}
-          </group>
-        ) : null}
         <group
           position={[-anchor.x * scale, -anchor.y * scale, -anchor.z * scale]}
           scale={[scale, scale, scale]}
@@ -841,13 +788,13 @@ function BandStage({ active, selectedActivityId }: { active: boolean; selectedAc
         <LiveBandModel
           active={active}
           path={JAZZ_BAND_MODEL}
-          position={[-0.6, 1.6, 0.4]}
+          position={[0.1, 1.4, 0.8]}
           rotation={[0, Math.PI, 0]}
-          targetHeight={5.2}
+          targetHeight={4.6}
         />
       </Suspense>
 
-      <pointLight color="#ffb97d" distance={14} intensity={active ? 2.4 : 0.9} position={[0, 4.8, 1.2]} />
+      <pointLight color="#ffb97d" distance={14} intensity={active ? 2.6 : 1.1} position={[0, 4.2, 1.2]} />
       <pointLight color="#7db4ff" distance={12} intensity={active ? 1.8 : 0.6} position={[-1.8, 4.2, 0.8]} />
       <pointLight color="#ff98b3" distance={12} intensity={active ? 1.4 : 0.5} position={[1.8, 4, 0.8]} />
       {[-2.6, 2.6].map((x) => (

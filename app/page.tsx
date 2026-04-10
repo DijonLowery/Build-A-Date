@@ -144,7 +144,7 @@ export default function Page() {
 
     const timeoutId = window.setTimeout(() => {
       setPhase((current) => (current === "introBrief" ? "walkingDate" : current));
-    }, 1600);
+    }, 3200);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -165,7 +165,7 @@ export default function Page() {
     const timeoutId = window.setTimeout(() => {
       datePromptOpenedRef.current = true;
       setPhase((current) => (current === "arrivedDate" ? "selectingDate" : current));
-    }, 1600);
+    }, 3200);
 
     return () => {
       window.clearTimeout(timeoutId);
