@@ -50,6 +50,11 @@ export default function FinalReveal() {
         display: "flex", alignItems: "center", justifyContent: "center",
         background: "radial-gradient(ellipse at center 40%, rgba(18,10,25,0.92), rgba(5,3,10,0.98))",
         backdropFilter: "blur(40px)",
+        // The parent overlay in page.tsx sets pointerEvents: "none" so petals
+        // pass through. Every interactive child (ChoiceCard, CalendarPicker)
+        // flips it back on at its root — FinalReveal has to do the same, or
+        // the "Send it to Dijon" anchor never receives the tap.
+        pointerEvents: "auto",
       }}
     >
       <div style={{
