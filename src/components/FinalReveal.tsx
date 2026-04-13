@@ -2,14 +2,30 @@
 import { useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useStore } from "@/store";
+import { labelFor } from "@/lib/choices";
+
+// The headline "Your night is set." starts its fade-in after this many
+// milliseconds. We fire the audio fade at the same moment so the music
+// dissolves visibly-in-sync with the reveal text appearing.
+const TITLE_FADE_DELAY_MS = 500;
 
 export default function FinalReveal() {
   const { selectedDate, selectedDinner, selectedActivity, selectedDrinks, triggerAudioFadeOut } = useStore();
 
-  // Fade audio out the moment "Your night is set." appears.
+  // Kick off the background-music fade at the instant "Your night is set."
+  // begins to appear — see TITLE_FADE_DELAY_MS above.
   useEffect(() => {
-    triggerAudioFadeOut();
+    const id = window.setTimeout(() => triggerAudioFadeOut(), TITLE_FADE_DELAY_MS);
+    return () => window.clearTimeout(id);
   }, [triggerAudioFadeOut]);
+
+  // On the reveal screen we still show Madison the romantic nicknames she
+  // picked ("Big Time", "XO"). Dijon, however, needs plain-English answers
+  // he can act on, so the outbound SMS uses the descriptive labels
+  // ("Steakhouse", "XO HiFi") resolved via labelFor().
+  const smsDinner = labelFor("dinner", selectedDinner);
+  const smsActivity = labelFor("activity", selectedActivity);
+  const smsDrinks = labelFor("drinks", selectedDrinks);
 
   const items = [
     { label: "The Night", value: selectedDate },
@@ -29,16 +45,16 @@ export default function FinalReveal() {
       "Build-A-Date - Madison's pick",
       "",
       `The Night: ${selectedDate ?? "-"}`,
-      `Dinner: ${selectedDinner ?? "-"}`,
-      `The Vibe: ${selectedActivity ?? "-"}`,
-      `Last Stop: ${selectedDrinks ?? "-"}`,
+      `Dinner: ${smsDinner ?? "-"}`,
+      `The Vibe: ${smsActivity ?? "-"}`,
+      `Last Stop: ${smsDrinks ?? "-"}`,
       "",
       "All you have to do is show up.",
     ].join("\n");
     const encoded = encodeURIComponent(body);
     const phone = "+13149229048";
     return `sms:${phone}?body=${encoded}`;
-  }, [selectedDate, selectedDinner, selectedActivity, selectedDrinks]);
+  }, [selectedDate, smsDinner, smsActivity, smsDrinks]);
 
   return (
     <motion.div
