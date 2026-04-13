@@ -496,7 +496,9 @@ function WorldPostEffects({ mobileView }: { mobileView: boolean }) {
           quality="medium"
           screenSpaceRadius
         />
-      ) : null}
+      ) : (
+        <></>
+      )}
       <Bloom
         intensity={mobileView ? 0.18 : 0.4}
         luminanceSmoothing={0.9}
@@ -513,7 +515,9 @@ function WorldPostEffects({ mobileView }: { mobileView: boolean }) {
           radialModulation
           modulationOffset={0.52}
         />
-      ) : null}
+      ) : (
+        <></>
+      )}
       <Vignette darkness={mobileView ? 0.2 : 0.3} eskil={false} offset={0.5} />
     </EffectComposer>
   );

@@ -14,25 +14,21 @@ export const metadata: Metadata = {
     apple: "/apple-icon",
     icon: "/icon"
   },
+  // We intentionally don't list `images` here. Next.js auto-injects the
+  // og:image / twitter:image meta tags from the `opengraph-image.jpg`,
+  // `twitter-image.jpg`, and `*.alt.txt` files placed alongside this layout.
+  // Listing them explicitly would emit duplicate tags.
   openGraph: {
     title: "Build-A-Date",
     description: "A romantic guided Kansas City date-night journey for Madison.",
-    images: [
-      {
-        alt: "Build-A-Date preview",
-        height: 630,
-        url: "/opengraph-image",
-        width: 1200
-      }
-    ],
     type: "website",
+    siteName: "Build-A-Date",
     url: siteUrl
   },
   twitter: {
     card: "summary_large_image",
     title: "Build-A-Date",
-    description: "A romantic guided Kansas City date-night journey for Madison.",
-    images: ["/opengraph-image"]
+    description: "A romantic guided Kansas City date-night journey for Madison."
   }
 };
 
