@@ -101,10 +101,12 @@ export default function TitlePrologue() {
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 40 }}>
-      {/* Hyperrealistic garden background */}
+      {/* Hyperrealistic garden background — `garden-clean.png` is the
+          layout-free version; `reference.png` has the title/copy baked in
+          and must NOT be used at runtime or it will double-render the text. */}
       <div style={{
         position: "absolute", inset: 0,
-        backgroundImage: "url('/title-prologue/reference.png')",
+        backgroundImage: "url('/title-prologue/garden-clean.png')",
         backgroundSize: "cover",
         backgroundPosition: "center center",
         backgroundRepeat: "no-repeat",
